@@ -49,6 +49,6 @@ router.get('/completion/:workspace/:end/:type', function (req, res, params, quer
   if(params.type == 'part') request.files[0].offset = req.body.file.offset
   
   terns[params.workspace].request(request, function (e, data) {
-    res.write(JSON.stringify(data.completions))
+    res.end(JSON.stringify(data.completions))
   })
 })

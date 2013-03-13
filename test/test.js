@@ -28,9 +28,9 @@ request.post('http://0.0.0.0:5678/workspace/0', {
             text: fs.readFileSync(path.join(__dirname, 'wrkspc', 'b/c.js'), 'utf8')
           }
         }
-      }, function (e, body) {
+      }, function (e, req) {
         if(e) throw e
-        console.log(body);
+        console.log(req.body);
       })
     })
   })
