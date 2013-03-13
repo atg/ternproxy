@@ -1,0 +1,16 @@
+{
+  "name": "ternproxy",
+  "version": "0.0.1",
+  "main": "src/server.js",
+  "license": "Unlicense",
+  "dependencies": {
+    "tern": "git://github.com/marijnh/tern.git",
+    "turnout": "0.0.x",
+    "connect": "2.7.x",
+    "blage": "0.0.x",
+    "clone": "0.1.x"
+  },
+  "devDependencies": {
+    "request": "2.14.x"
+  }
+}
