@@ -5,12 +5,7 @@
   "license": "Unlicense",
   "dependencies": {
     "tern": "git://github.com/marijnh/tern.git",
-    "turnout": "0.0.x",
-    "connect": "2.7.x",
-    "blage": "0.0.x",
-    "clone": "0.1.x"
-  },
-  "devDependencies": {
-    "request": "2.14.x"
+    "debug": "~0.7.2",
+    "formidable": "~1.0.13"
   }
 }
