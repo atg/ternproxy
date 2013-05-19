@@ -209,7 +209,7 @@ router.post('/rename', function (req, res) {
     query: {
       type: 'documentation',
       file: proxy.filename(req.body),
-      end: Number(req.body.cursor_position)
+      end: Number(req.body.cursor_position),
       newName: req.body.new_name
     }, files: [proxy.file(req.body)]
   }, utils.http.request(res))
