@@ -12,8 +12,6 @@ http.createServer(router).listen(8542, function () {
 
 
 router.post('/file/opened', function (req, res) {
-  var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  
   if(proxy.untitled(req.body.path)) {
     cache[req.body.document_id] = req.body.TEXT
     utils.http.respond(res, 200, 'Document opened')
@@ -21,8 +19,6 @@ router.post('/file/opened', function (req, res) {
 })
 
 router.post('/file/closed', function (req, res) {
-  var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  
   if(cache[req.body.document_id]) {
     cache[req.body.document_id] = undefined
     utils.http.respond(res, 200, 'Document closed')
