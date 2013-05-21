@@ -10,6 +10,7 @@ var interpolate = require('util').format,
     fs = require('fs')
 
 var utils = module.exports
+utils.completions = noop
 utils.find = noop
 utils.load = noop
 utils.get = noop
@@ -19,15 +20,15 @@ utils.http = noop
 utils.get.config = function (dir) {
   var config = tryor(function() {
       return fs.readFileSync(path.join(dir, '.tern-project'), 'utf8')
-  }, present)
+  }, "{}")
   
+  config = JSON.parse(config)
+    
   return merge(config, present)
 }
 
-utils.get.file = function (dir) {
-  return function (name, callback) {
-    fs.readFile(path.resolve(dir, name), 'utf8', callback)
-  }
+utils.get.file = function (name, callback) {
+  fs.readFile(name, 'utf8', callback)
 }
 
 utils.load.plugins = function (plugins) {
@@ -66,4 +67,18 @@ utils.http.respond = function (res, status, body) {
   if(isObj) res.setHeader('content-type', 'application/json')
   res.statusCode = status
   res.end(isObj ? JSON.stringify(body) : body)
+}
+
+utils.http.respond.domain = function (res, status) {
+  return function (e) {
+    utils.http.respond(res, 500, e.message)
+  }
+}
+
+utils.completions.order = function (callback) {
+  return function (e, data) {
+    if(e) return callback(e, data)
+    data.completions = data.completions.sort(function (a, b) { return a.depth - b.depth })
+    callback(e, data)
+  }
 }

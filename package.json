@@ -1,6 +1,6 @@
 {
   "name": "ternproxy",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "src/daemon.js",
   "license": "Unlicense",
   "dependencies": {
@@ -10,5 +10,14 @@
     "findpkg": "0.0.x",
     "lodash": "1.2.x",
     "tryor": "0.1.x"
+  },
+  "scripts": {
+    "test": "node_modules/.bin/mocha test/specs -u exports -R spec"
+  },
+  "devDependencies": {
+    "request": "2.21.x",
+    "mocha": "1.9.x",
+    "async": "0.2.x",
+    "chai": "1.6.x"
   }
 }

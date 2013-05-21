@@ -8,6 +8,7 @@ module.exports = function (dir, id, callback) {
   var self = this
   
   self.id = id
+  self.cache = {}
   self.dir = path.resolve(dir)
   self.config = utils.get.config(self.dir)
   self.defs = utils.find.defs(self.dir, self.config.libs)
@@ -16,7 +17,7 @@ module.exports = function (dir, id, callback) {
   self.callback = callback
   
   self.tern = new tern.Server({
-    getFile: utils.get.file(self.dir),
+    getFile: utils.get.file,
     async: true,
     defs: self.defs,
     plugins: self.config.plugins,
