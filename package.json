@@ -1,23 +1,24 @@
 {
   "name": "ternproxy",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "src/daemon.js",
   "license": "Unlicense",
   "dependencies": {
     "tern": "git://github.com/marijnh/tern.git",
     "formidable": "1.0.x",
     "deepmerge": "0.2.x",
+    "optimist": "0.5.x",
     "findpkg": "0.0.x",
     "lodash": "1.2.x",
     "tryor": "0.1.x"
-  },
-  "scripts": {
-    "test": "node_modules/.bin/mocha test/specs -u exports -R spec"
   },
   "devDependencies": {
     "request": "2.21.x",
     "mocha": "1.9.x",
     "async": "0.2.x",
     "chai": "1.6.x"
+  },
+  "scripts": {
+    "test": "node_modules/.bin/mocha test/specs -u exports -R spec"
   }
 }

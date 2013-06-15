@@ -21,9 +21,9 @@ utils.get.config = function (dir) {
   var config = tryor(function() {
       return fs.readFileSync(path.join(dir, '.tern-project'), 'utf8')
   }, "{}")
-  
+
   config = JSON.parse(config)
-    
+
   return merge(config, present)
 }
 
@@ -33,7 +33,7 @@ utils.get.file = function (name, callback) {
 
 utils.load.plugins = function (plugins) {
   var base = path.resolve(utils.find.module('tern').dirname, 'plugin')
-  
+
   Object.keys(plugins).forEach(function (plugin) {
     var file = path.join(base, interpolate('%s.js', plugin))
     if(fs.existsSync(file)) return require(file)
@@ -46,7 +46,7 @@ utils.find.module = function (name) {
 
 utils.find.defs = function (dir, libs) {
   var base = path.resolve(utils.find.module('tern').dirname, 'defs')
-  
+
   return compact(libs.map(function (lib) {
     if(!/\.json$/.test(lib)) lib = lib + '.json';
     var file = path.join(base, lib)
@@ -54,24 +54,19 @@ utils.find.defs = function (dir, libs) {
   }))
 }
 
-utils.http.request = function (res) {
-  return function (e, data) {
-    if(!e) return utils.http.respond(res, 200, data)
-    log.onError(e)
-    utils.http.respond(res, 500, e)
-  }
-}
-
-utils.http.respond = function (res, status, body) {
-  var isObj = (typeof body === 'object')
-  if(isObj) res.setHeader('content-type', 'application/json')
-  res.statusCode = status
-  res.end(isObj ? JSON.stringify(body) : body)
-}
-
-utils.http.respond.domain = function (res, status) {
-  return function (e) {
-    utils.http.respond(res, 500, e.message)
+utils.http.respond = function (req, res) {
+  return function (e, data, status) {
+    if(e) log.onError(e)
+    log.res(req, res, data)
+    
+    if(!e && typeof status !== 'number') status = 200
+    if(e && typeof status !== 'number') status = 500
+    
+    var isObj = (typeof data === 'object')
+    if(isObj) res.setHeader('content-type', 'application/json')
+    
+    res.statusCode = status
+    res.end(isObj ? JSON.stringify(data) : data)
   }
 }
 

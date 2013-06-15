@@ -30,11 +30,17 @@ proxy.untitled = function (path) {
   return path === '///null'
 }
 
+proxy.compact = function (workspace) {
+  return Object.keys(workspace.cache).filter(function (id) {
+    return !!workspace.cache[id]
+  })
+}
+
 proxy.file = function (info) {
   if(!info.FILE) return []
-  
+
   var workspace = proxy.workspace(info.project_id, info.project_dir)
-  var full = !!info.sending_full_content
+  var full = !!JSON.parse(info.sending_full_content)
   var offset = Number(info.delta_offset)
   var length = Number(info.delta_length)
   var document_id = info.document_id
@@ -43,15 +49,18 @@ proxy.file = function (info) {
 
   if(!full) text = proxy.delta(workspace, document_id, offset, length, text)
   else workspace.cache[document_id] = text
-  
+
   return [{type: 'full', name: name, text: text, offset: offset }]
 }
 
 proxy.delta = function (workspace, document_id, offset, length, content) {
+  if(!workspace.cache[document_id]) return ''
+  
   var oldContent = workspace.cache[document_id]
   var prefix = oldContent.substr(0, offset)
   var suffix = oldContent.substr(offset + length, oldContent.length - offset - length)
-  
+
   workspace.cache[document_id] = content = prefix + content + suffix
+  
   return content
 }

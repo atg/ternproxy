@@ -12,6 +12,7 @@ describe('/completions', function () {
       project_id: '0',
       project_dir: path.join(__dirname, '..', 'workspaces', '#0'),
       path: path.join(__dirname, '..', 'workspaces', '#0', 'node.js'),
+      sending_full_content: false,
       cursor_position: 60
     }, function (e, result) {
       if(e) return callback(e)
@@ -30,6 +31,7 @@ describe('/completions', function () {
     before(function (callback) {
       utils.query('/file/opened', {
         project_dir: project_dir,
+        sending_full_content: true,
         project_id: 0,
         document_id: 0,
         FILE: FILE
@@ -68,6 +70,7 @@ describe('/completions', function () {
         project_id: 0,
         document_id: 0,
         project_dir: project_dir,
+        sending_full_content: false,
         path: filename,
         FILE: 'fs.',
         delta_offset: 56,
@@ -88,6 +91,7 @@ describe('/completions', function () {
         project_id: 0,
         document_id: 0,
         project_dir: project_dir,
+        sending_full_content: false,
         path: filename,
         FILE: 'rea',
         delta_offset: 59,
@@ -113,6 +117,7 @@ describe('/completions', function () {
         project_dir: project_dir,
         project_id: 0,
         document_id: 1,
+        sending_full_content: true,
         FILE: FILE
       }, callback)
     })
@@ -121,6 +126,7 @@ describe('/completions', function () {
       utils.query('/file/closed', {
         project_dir: project_dir,
         project_id: 0,
+        sending_full_content: false,
         document_id: 1
       }, callback)
     })
@@ -151,6 +157,7 @@ describe('/completions', function () {
         project_id: 0,
         document_id: 0,
         project_dir: project_dir,
+        sending_full_content: false,
         path: filename,
         FILE: '\n\nBook.prototype.open = function () {\n  return \'\'\n}\n\nvar hp = new Book()\n\nhp.',
         delta_offset: 342,
@@ -171,6 +178,7 @@ describe('/completions', function () {
         project_id: 0,
         document_id: 0,
         project_dir: project_dir,
+        sending_full_content: false,
         path: filename,
         FILE: 'op',
         delta_offset: 419,
