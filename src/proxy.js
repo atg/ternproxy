@@ -28,7 +28,7 @@ proxy.workspace.find = function (info) {
   
   if(project_ids.length) return proxy.workspaces[project_ids.pop()]
   
-  var project_dir = path.dirname(file)
+  var project_dir = path.dirname(info.path)
   var project_id = info.project_id
   
   return proxy.workspaces[project_id] = new workspace(project_dir, project_id, proxy.timeout(project_id), 300000)
