@@ -1,5 +1,4 @@
 var interpolate = require('util').format,
-    compact = require('lodash').compact,
     present = require('./config.json'),
     findpkg = require('findpkg'),
     merge = require('deepmerge'),
@@ -47,11 +46,13 @@ utils.find.module = function (name) {
 utils.find.defs = function (dir, libs) {
   var base = path.resolve(utils.find.module('tern').dirname, 'defs')
 
-  return compact(libs.map(function (lib) {
+  return libs.map(function (lib) {
     if(!/\.json$/.test(lib)) lib = lib + '.json';
     var file = path.join(base, lib)
     if(fs.existsSync(file)) return require(file)
-  }))
+  }).filter(function (lib) {
+    return !!lib
+  })
 }
 
 utils.http.respond = function (req, res) {

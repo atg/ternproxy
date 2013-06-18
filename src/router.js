@@ -6,7 +6,8 @@ var interpolate = require('util').format,
 
 module.exports = function () {
   var routes = {
-    post: {}
+    post: {},
+    get: {}
   }
 
   var process = function (req, res) {
@@ -27,10 +28,12 @@ module.exports = function () {
   var middleware = function (req, res) {
     domain.create().on('error', utils.http.respond(req, res)).run(process(req, res))
   }
-
-  middleware.post = function (route, callback) {
-    routes.post[route] = callback
-  }
+  
+  ;['post', 'get'].forEach(function (method) {
+    middleware[method] = function (route, callback) {
+      routes[method][route] = callback
+    }
+  })
 
   return middleware
 }

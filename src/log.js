@@ -51,7 +51,7 @@ module.exports.res = function (req, res, data) {
   console.log(log)
 }
 
-module.exports.res['/file/complete'] = function (body, log) {
+module.exports.res['/completions'] = function (body, log) {
   return log.concat(body.completions.map(function (completion) {
     return interpolate('\n| (%s) %s = %s (%s)', completion.depth, completion.name, completion.type, completion.origin)
   }).join())

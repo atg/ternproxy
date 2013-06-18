@@ -4,7 +4,7 @@ var utils = require('./utils'),
     fs = require('fs')
 
 
-module.exports = function (dir, id, callback) {
+module.exports = function (dir, id, callback, timeout) {
   var self = this
   
   self.id = id
@@ -13,7 +13,7 @@ module.exports = function (dir, id, callback) {
   self.config = utils.get.config(self.dir)
   self.defs = utils.find.defs(self.dir, self.config.libs)
   utils.get.plugins(self.config.plugins)
-  self.timeout = setTimeout(callback, 1800000) //30m
+  self.timeout = setTimeout(callback, timeout | 1800000) //30m
   self.callback = callback
   
   self.tern = new tern.Server({

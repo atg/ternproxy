@@ -72,13 +72,13 @@ router.post('/file/closed', function (req, res) {
  */
 router.post('/completions', function (req, res) {
   var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  var file = req.body.FILE === undefined ? proxy.filename(req.body) : '#0'
+  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
   workspace.tern.request({
     files: proxy.file(req.body),
     query: {
       type: 'completions',
-      file: file,
+      file: '#0',
       types: true,
       depths: true,
       docs: true,
@@ -115,14 +115,16 @@ router.post('/completions', function (req, res) {
  *   {string} origin
  */
 router.post('/definition', function (req, res) {
-  var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  var file = req.body.FILE === undefined ? '#0' : proxy.filename(req.body)
-
+  if(!req.body.project_dir) var workspace = proxy.workspace.find(req.body)
+  else var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+  
+  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
+  
   workspace.tern.request({
     query: {
       type: 'definition',
       end: Number(req.body.cursor_position),
-      file: file
+      file: '#0'
     }, files: proxy.file(req.body)
   }, utils.http.respond(req, res))
 })
@@ -153,40 +155,16 @@ router.post('/definition', function (req, res) {
  *   {string} origin
  */
 router.post('/type', function (req, res) {
-  var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  var file = req.body.FILE === undefined ? '#0' : proxy.filename(req.body)
+  if(!req.body.project_dir) var workspace = proxy.workspace.find(req.body)
+  else var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+  
+  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
   workspace.tern.request({
     query: {
       type: 'type',
       end: Number(req.body.cursor_position),
-      file: file
-    }, files: proxy.file(req.body)
-  }, utils.http.respond(req, res))
-})
-
-
-/*
- * Get the documentation string and URL for a given expression, if any
- *
- * @param {number} [start]
- * @param {number} end Cursor position
- * @param {string} file Relative path of the file
- *
- * @returns {object}
- *   {string} docs
- *   {string} urls
- *   {string} origin
- */
-router.post('/documentation', function (req, res) {
-  var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  var file = req.body.FILE === undefined ? '#0' : proxy.filename(req.body)
-
-  workspace.tern.request({
-    query: {
-      type: 'documentation',
-      end: Number(req.body.cursor_position),
-      file: file
+      file: '#0'
     }, files: proxy.file(req.body)
   }, utils.http.respond(req, res))
 })
@@ -207,8 +185,10 @@ router.post('/documentation', function (req, res) {
  *     {number} end
  */
 router.post('/refs', function (req, res) {
-  var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  var file = req.body.FILE === undefined ? '#0' : proxy.filename(req.body)
+  if(!req.body.project_dir) var workspace = proxy.workspace.find(req.body)
+  else var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+  
+  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
   workspace.tern.request({
     query: {
@@ -236,8 +216,10 @@ router.post('/refs', function (req, res) {
  *     {string} text
  */
 router.post('/rename', function (req, res) {
-  var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  var file = req.body.FILE === undefined ? '#0' : proxy.filename(req.body)
+  if(!req.body.project_dir) var workspace = proxy.workspace.find(req.body)
+  else var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+  
+  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
   workspace.tern.request({
     query: {
@@ -250,56 +232,15 @@ router.post('/rename', function (req, res) {
 })
 
 
-/*
- * Get a list of all known object property names (for any object)
- *
- * @param {string} [prefix] Causes the server to only return properties that start
- *   with the given string
- * @param {boolean} [sort=true] Whether the result should be sorted.
- *
- * @returns {object}
- *   {array} completions
- */
-router.post('/properties', function (req, res) {
-  var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  var file = req.body.FILE === undefined ? '#0' : proxy.filename(req.body)
-
-  workspace.tern.request({
-    query: {
-      type: 'properties',
-      prefix: req.body.prefix,
-    }, files: proxy.file(req.body)
-  }, utils.http.respond(req, res))
+router.get('/ping', function (req, res) {
+  utils.http.respond(req, res)(null, {
+    memory: process.memoryUsage(),
+    uptime: process.uptime(),
+    pid: process.pid,
+    version: process.version,
+    cwd: process.cwd()
+  })
 })
-
-
-/*
- * Get the files that the server currently holds in its set of analyzed files
- *
- * @returns {object}
- *   {array} files
- */
-router.post('/files', function (req, res) {
-  var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  var file = req.body.FILE === undefined ? '#0' : proxy.filename(req.body)
-
-  workspace.tern.request({
-    query: {
-      type: 'files'
-    }, files: proxy.file(req.body)
-  }, utils.http.respond(req, res))
-})
-
-
-/*
- * Get symbols of a file
- *
- * @returns {array}
- *   {string} type
- *   {name} type
- *   {array} childs
- */
-router.post('/symbols', function (req, res) {})
 
 
 

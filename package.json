@@ -1,6 +1,6 @@
 {
   "name": "ternproxy",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "src/daemon.js",
   "license": "Unlicense",
   "dependencies": {
@@ -9,7 +9,6 @@
     "deepmerge": "0.2.x",
     "optimist": "0.5.x",
     "findpkg": "0.0.x",
-    "lodash": "1.2.x",
     "tryor": "0.1.x"
   },
   "devDependencies": {
