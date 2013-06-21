@@ -84,7 +84,6 @@ router.post('/file/complete', function (req, res) {
       docs: true,
       urls: true,
       origins: true,
-      omitObjectPrototype: false,
       end: Number(req.body.cursor_position)
     }
   }, utils.completions.order(utils.http.respond(req, res)))
