@@ -3,6 +3,7 @@ var events = require('events').EventEmitter,
     router = require('./router')(),
     proxy = require('./proxy'),
     utils = require('./utils'),
+    posix = require('posix'),
     log = require('./log'),
     http = require('http')
 
@@ -270,6 +271,9 @@ router.get('/ping', function (req, res) {
 })
 
 
+setInterval(function () {
+  if(posix.getppid() < 2) process.exit()
+}, 60000)
 
 
 // For testing purposes

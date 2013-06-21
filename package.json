@@ -9,7 +9,8 @@
     "deepmerge": "0.2.x",
     "optimist": "0.5.x",
     "findpkg": "0.0.x",
-    "tryor": "0.1.x"
+    "tryor": "0.1.x",
+    "posix": "1.0.x"
   },
   "devDependencies": {
     "request": "2.21.x",
