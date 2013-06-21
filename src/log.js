@@ -1,5 +1,4 @@
 var interpolate = require('util').format,
-    
     verbose = require('optimist').argv.v
 
 module.exports = function (message) {
@@ -46,12 +45,12 @@ module.exports.res = function (req, res, data) {
   
   if(module.exports.res[req.url]) log = module.exports.res[req.url](data, log)
   else return console.log(log)
-
+  
   log += '\n+------------------------------------------+\n'
   console.log(log)
 }
 
-module.exports.res['/completions'] = function (body, log) {
+module.exports.res['/file/complete'] = function (body, log) {
   return log.concat(body.completions.map(function (completion) {
     return interpolate('\n| (%s) %s = %s (%s)', completion.depth, completion.name, completion.type, completion.origin)
   }).join())

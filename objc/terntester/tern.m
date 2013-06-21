@@ -279,7 +279,7 @@ static NSRange TernChangedRange(NSString* a, NSString* b, NSRange* newUnequal) {
     
     contents = [deltaResult objectForKey:@"FILE"];
     
-    [[TernController sharedController] sendRequestToURLPath:@"/completions"
+    [[TernController sharedController] sendRequestToURLPath:@"/file/complete"
                                               urlParameters:@{}
                                              postParameters:params
                                               fileParameter:contents

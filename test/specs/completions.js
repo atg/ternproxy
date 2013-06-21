@@ -4,11 +4,11 @@ var expect = require('chai').expect,
     path = require('path'),
     fs = require('fs')
 
-describe('/completions', function () {
+describe('/file/complete', function () {
   var project_dir = path.join(__dirname, '..', 'workspaces', '#0')
   
   it('no FILE', function (callback) {
-    utils.query('/completions', {
+    utils.query('/file/complete', {
       project_id: '0',
       project_dir: path.join(__dirname, '..', 'workspaces', '#0'),
       path: path.join(__dirname, '..', 'workspaces', '#0', 'node.js'),
@@ -47,7 +47,7 @@ describe('/completions', function () {
     })
   
     it('without offset', function (callback) {
-      utils.query('/completions', {
+      utils.query('/file/complete', {
         project_id: 0,
         document_id: 0,
         project_dir: project_dir,
@@ -66,7 +66,7 @@ describe('/completions', function () {
     })
   
     it('with offset', function (callback) {
-      utils.query('/completions', {
+      utils.query('/file/complete', {
         project_id: 0,
         document_id: 0,
         project_dir: project_dir,
@@ -87,7 +87,7 @@ describe('/completions', function () {
     })
     
     it('with new offset', function (callback) {
-      utils.query('/completions', {
+      utils.query('/file/complete', {
         project_id: 0,
         document_id: 0,
         project_dir: project_dir,
@@ -132,7 +132,7 @@ describe('/completions', function () {
     })
     
     it('without offset', function (callback) {
-      utils.query('/completions', {
+      utils.query('/file/complete', {
         project_id: 0,
         document_id: 0,
         project_dir: project_dir,
@@ -153,7 +153,7 @@ describe('/completions', function () {
     })
     
     it('with offset', function (callback) {
-      utils.query('/completions', {
+      utils.query('/file/complete', {
         project_id: 0,
         document_id: 0,
         project_dir: project_dir,
@@ -174,7 +174,7 @@ describe('/completions', function () {
     })
     
     it('with new offset', function (callback) {
-      utils.query('/completions', {
+      utils.query('/file/complete', {
         project_id: 0,
         document_id: 0,
         project_dir: project_dir,

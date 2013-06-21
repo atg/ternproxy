@@ -70,7 +70,7 @@ router.post('/file/closed', function (req, res) {
  *     {string} url
  *     {} origin
  */
-router.post('/completions', function (req, res) {
+router.post('/file/complete', function (req, res) {
   var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
@@ -163,6 +163,34 @@ router.post('/type', function (req, res) {
   workspace.tern.request({
     query: {
       type: 'type',
+      end: Number(req.body.cursor_position),
+      file: '#0'
+    }, files: proxy.file(req.body)
+  }, utils.http.respond(req, res))
+})
+
+
+/*
+ * Get the documentation string and URL for a given expression, if any
+ *
+ * @param {number} [start]
+ * @param {number} end Cursor position
+ * @param {string} file Relative path of the file
+ *
+ * @returns {object}
+ *   {string} docs
+ *   {string} urls
+ *   {string} origin
+ */
+router.post('/documentation', function (req, res) {
+  if(!req.body.project_dir) var workspace = proxy.workspace.find(req.body)
+  else var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+  
+  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
+
+  workspace.tern.request({
+    query: {
+      type: 'documentation',
       end: Number(req.body.cursor_position),
       file: '#0'
     }, files: proxy.file(req.body)
