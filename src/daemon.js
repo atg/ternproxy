@@ -10,7 +10,7 @@ var events = require('events').EventEmitter,
 
 
 
-http.createServer(router).listen(8542, function () {
+var server = http.createServer(router).listen(8542, function () {
   module.exports.emit('listening')
   module.exports.listening = true
   log('HTTP server running')
@@ -272,6 +272,7 @@ router.get('/ping', function (req, res) {
 
 
 setInterval(function () {
+  if(server.connections > 0) return
   if(posix.getppid() < 2) process.exit()
 }, 60000)
 
