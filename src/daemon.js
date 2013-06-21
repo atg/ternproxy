@@ -274,7 +274,7 @@ router.get('/ping', function (req, res) {
 setInterval(function () {
   if(server.connections > 0) return
   if(posix.getppid() < 2) process.exit()
-}, 60000)
+}, 30000)
 
 
 // For testing purposes
