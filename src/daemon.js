@@ -10,11 +10,20 @@ var events = require('events').EventEmitter,
 
 
 
-var server = http.createServer(router).listen(8542, function () {
+var server = http.createServer(router).on('connection', function(socket) {
+  //limit the timeout to 1000ms. Node.js default is 120000ms
+  socket.setTimeout(1000)
+}).listen(8542, function () {
   module.exports.emit('listening')
   module.exports.listening = true
   log('HTTP server running')
 })
+
+//every 30s check if the parent is still running
+setInterval(function () {
+  if(server.connections) return
+  if(posix.getppid() < 2) process.exit()
+}, 30000)
 
 
 router.post('/file/opened', function (req, res) {
@@ -269,12 +278,6 @@ router.get('/ping', function (req, res) {
     cwd: process.cwd()
   })
 })
-
-
-setInterval(function () {
-  if(server.connections > 0) return
-  if(posix.getppid() < 2) process.exit()
-}, 30000)
 
 
 // For testing purposes

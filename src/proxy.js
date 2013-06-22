@@ -37,7 +37,6 @@ proxy.workspace.find = function (info) {
 proxy.timeout = function (id) {
   return function () {
     proxy.workspaces[id] = undefined
-    delete proxy.workspaces[id]
   }
 }
 
