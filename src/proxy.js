@@ -68,19 +68,21 @@ proxy.file = function (info) {
   var text = info.FILE
 
   if(!full) text = proxy.delta(workspace, document_id, offset, length, text)
-  else workspace.cache[document_id] = text
+  else workspace.file(document_id, text)
 
   return [{type: 'full', name: name, text: text}]
 }
 
 proxy.delta = function (workspace, document_id, offset, length, content) {
-  if(!workspace.cache[document_id]) return ''
+  var oldContent = workspace.file(document_id)
   
-  var oldContent = workspace.cache[document_id]
+  if(!oldContent) return ''
+  
   var prefix = oldContent.substr(0, offset)
   var suffix = oldContent.substr(offset + length, oldContent.length - offset - length)
-
-  workspace.cache[document_id] = content = prefix + content + suffix
+  
+  content = prefix + content + suffix
+  workspace.file(document_id, content)
   
   return content
 }

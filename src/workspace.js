@@ -4,17 +4,18 @@ var utils = require('./utils'),
     fs = require('fs')
 
 
-module.exports = function (dir, id, callback, timeout) {
+var workspace = module.exports = function (dir, id, callback, tolerance) {
   var self = this
   
   self.id = id
   self.cache = {}
   self.dir = path.resolve(dir)
+  self.tolerance = tolerance | 1800000 //30m
   self.config = utils.get.config(self.dir)
   self.defs = utils.find.defs(self.dir, self.config.libs)
   utils.get.plugins(self.config.plugins)
-  self.timeout = setTimeout(callback, timeout | 1800000) //30m
   self.callback = callback
+  self.extend()
   
   self.tern = new tern.Server({
     getFile: utils.get.file,
@@ -29,7 +30,30 @@ module.exports = function (dir, id, callback, timeout) {
   })
 }
 
-module.exports.prototype.extend = function () {
-  clearTimeout(this.timeout)
-  this.timeout = setTimeout(this.callback, 1800000) //30m
+workspace.prototype.extend = function () {
+  if(this.timeout) clearTimeout(this.timeout)
+  this.timeout = setTimeout(this.callback, this.tolerance)
+}
+
+workspace.prototype.file = function (id, text) {
+  if(!id) return
+  
+  if(this.cache[id]) clearTimeout(this.cache[id].timeout)
+  
+  if(arguments.length < 2) {
+    this.cache[id].timeout = setTimeout(this.clean(id), this.tolerance)
+    return this.cache[id].text
+  }
+  
+  if(text) this.cache[id] = {
+    text: text,
+    timeout: setTimeout(this.clean(id), this.tolerance)
+  }
+}
+
+workspace.prototype.clean = function (id) {
+  var self = this
+  return function () {
+    self.cache[id] = undefined
+  }
 }

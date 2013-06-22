@@ -29,7 +29,7 @@ setInterval(function () {
 router.post('/file/opened', function (req, res) {
   var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
 
-  workspace.cache[req.body.document_id] = req.body.FILE
+  workspace.file(req.body.document_id, req.body.FILE)
   utils.http.respond(req, res)(null, 'Document opened')
 })
 
@@ -38,7 +38,9 @@ router.post('/file/closed', function (req, res) {
   var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
 
   if(!workspace.cache[req.body.document_id]) return utils.http.respond(req, res)(null, '', 304)
-  workspace.cache[req.body.document_id] = undefined
+  clearTimeout(workspace.cache[req.body.document_id].timeout)
+  workspace.clean(req.body.document_id)()
+
   if(!proxy.compact(workspace)) proxy.timeout(workspace.id)()
   
   utils.http.respond(req, res)(null, 'Document closed')
