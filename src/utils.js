@@ -22,8 +22,12 @@ utils.get.config = function (dir) {
   }, "{}")
 
   config = JSON.parse(config)
-
-  return merge(config, present)
+  var merged = merge(config, present)
+  
+  if(Array.isArray(config.libs) && config.libs.indexOf('browser') < 1)
+    merged.libs.splice(merged.libs.indexOf('browser'), 1)
+  
+  return merged
 }
 
 utils.get.file = function (name, callback) {
