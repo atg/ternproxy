@@ -21,8 +21,7 @@ utils.get.config = function (dir) {
       return fs.readFileSync(path.join(dir, '.tern-project'), 'utf8')
   }, "{}")
 
-  config = JSON.parse(config)
-  var merged = merge(config, present)
+  var merged = merge(JSON.parse(config), present)
   
   if(Array.isArray(config.libs) && config.libs.indexOf('browser') < 1)
     merged.libs.splice(merged.libs.indexOf('browser'), 1)
