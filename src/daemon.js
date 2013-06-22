@@ -85,7 +85,7 @@ router.post('/file/closed', function (req, res) {
 router.post('/file/complete', function (req, res) {
   var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
-
+  
   workspace.tern.request({
     files: proxy.file(req.body),
     query: {
@@ -95,8 +95,7 @@ router.post('/file/complete', function (req, res) {
       depths: true,
       docs: true,
       urls: true,
-      origins: true,
-      end: Number(req.body.cursor_position)
+      end: req.body.cursor_position
     }
   }, utils.completions.order(utils.http.respond(req, res)))
 })
@@ -132,11 +131,12 @@ router.post('/definition', function (req, res) {
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
   
   workspace.tern.request({
+    files: proxy.file(req.body),
     query: {
       type: 'definition',
-      end: Number(req.body.cursor_position),
+      end: req.body.cursor_position,
       file: '#0'
-    }, files: proxy.file(req.body)
+    }
   }, utils.http.respond(req, res))
 })
 
@@ -172,11 +172,12 @@ router.post('/type', function (req, res) {
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
   workspace.tern.request({
+    files: proxy.file(req.body),
     query: {
       type: 'type',
-      end: Number(req.body.cursor_position),
+      end: req.body.cursor_position,
       file: '#0'
-    }, files: proxy.file(req.body)
+    }
   }, utils.http.respond(req, res))
 })
 
@@ -200,11 +201,12 @@ router.post('/documentation', function (req, res) {
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
   workspace.tern.request({
+    files: proxy.file(req.body),
     query: {
       type: 'documentation',
-      end: Number(req.body.cursor_position),
+      end: req.body.cursor_position,
       file: '#0'
-    }, files: proxy.file(req.body)
+    }
   }, utils.http.respond(req, res))
 })
 
@@ -230,11 +232,12 @@ router.post('/refs', function (req, res) {
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
   workspace.tern.request({
+    files: proxy.file(req.body),
     query: {
       type: 'refs',
-      end: Number(req.body.cursor_position),
+      end: req.body.cursor_position,
       file: file
-    }, files: proxy.file(req.body)
+    }
   }, utils.http.respond(req, res))
 })
 
@@ -261,12 +264,13 @@ router.post('/rename', function (req, res) {
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
   workspace.tern.request({
+    files: proxy.file(req.body),
     query: {
       type: 'rename',
-      end: Number(req.body.cursor_position),
+      end: req.body.cursor_position,
       newName: req.body.new_name,
       file: file
-    }, files: proxy.file(req.body)
+    }
   }, utils.http.respond(req, res))
 })
 

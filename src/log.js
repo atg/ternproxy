@@ -19,7 +19,7 @@ module.exports.req = function (req) {
   
   Object.keys(req.body).forEach(function (key) {
     if(key === 'FILE') return
-    var space = toSpaces(key.length + req.body[key].length + 3)
+    var space = toSpaces(key.length + req.body[key].toString().length + 3)
     log += interpolate('\n| %s: %s%s|', key, req.body[key], space)
   })
   
@@ -51,6 +51,7 @@ module.exports.res = function (req, res, data) {
 }
 
 module.exports.res['/file/complete'] = function (body, log) {
+  if(!body || !body.completions) return
   return log.concat(body.completions.map(function (completion) {
     return interpolate('\n| (%s) %s = %s (%s)', completion.depth, completion.name, completion.type, completion.origin)
   }).join())
@@ -58,7 +59,9 @@ module.exports.res['/file/complete'] = function (body, log) {
 
 function toSpaces (length) {
   if(length > 42) return ''
-  return new Array((42 - length) + 1).join(' ')
+  length = (42 - length) + 1
+  if(length < 1) return ''
+  return new Array(length).join(' ')
 }
 
 process.on('uncaughtException', module.exports.onError)

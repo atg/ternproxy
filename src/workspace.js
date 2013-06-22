@@ -40,12 +40,14 @@ workspace.prototype.file = function (id, text) {
   
   if(this.cache[id]) clearTimeout(this.cache[id].timeout)
   
-  if(arguments.length < 2) {
-    this.cache[id].timeout = setTimeout(this.clean(id), this.tolerance)
-    return this.cache[id].text
+  if(arguments.length < 2 && !this.cache[id]) {
+    this.file(id, '')
+    return this.file(id)
   }
   
-  if(text) this.cache[id] = {
+  if(arguments.length < 2) return this.cache[id].text
+  
+  this.cache[id] = {
     text: text,
     timeout: setTimeout(this.clean(id), this.tolerance)
   }
