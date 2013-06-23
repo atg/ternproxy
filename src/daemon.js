@@ -35,13 +35,13 @@ router.post('/file/opened', function (req, res) {
 
 
 router.post('/file/closed', function (req, res) {
-  var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-
-  if(!workspace.cache[req.body.document_id]) return utils.http.respond(req, res)(null, '', 304)
-  clearTimeout(workspace.cache[req.body.document_id].timeout)
-  workspace.clean(req.body.document_id)()
-
-  if(!proxy.compact(workspace)) proxy.timeout(workspace.id)()
+  proxy.workspaces.filter(function (workspace) {
+    return !!workspace.cache[req.body.document_id]
+  }).forEach(function (workspace) {
+    clearTimeout(workspace.cache[document_id].timeout)
+    workspace.clean(req.body.document_id)()
+    if(!proxy.compact(workspace)) proxy.timeout(workspace.id)()
+  })
   
   utils.http.respond(req, res)(null, 'Document closed')
 })
