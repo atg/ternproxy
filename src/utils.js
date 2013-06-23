@@ -22,10 +22,11 @@ utils.get.config = function (dir) {
   }, "{}")
 
   var merged = merge(JSON.parse(config), present)
-  
-  if(Array.isArray(config.libs) && config.libs.indexOf('browser') < 1)
+  merged.libs = utils.unique(merged.libs)
+
+  if(Array.isArray(config.libs) && config.libs.indexOf('browser') < 0)
     merged.libs.splice(merged.libs.indexOf('browser'), 1)
-  
+
   return merged
 }
 
@@ -62,13 +63,13 @@ utils.http.respond = function (req, res) {
   return function (e, data, status) {
     if(e) log.onError(e)
     log.res(req, res, data)
-    
+
     if(!e && typeof status !== 'number') status = 200
     if(e && typeof status !== 'number') status = 500
-    
+
     var isObj = (typeof data === 'object')
     if(isObj) res.setHeader('content-type', 'application/json')
-    
+
     res.statusCode = status
     res.end(isObj ? JSON.stringify(data) : data)
   }
@@ -80,4 +81,14 @@ utils.completions.order = function (callback) {
     data.completions = data.completions.sort(function (a, b) { return a.depth - b.depth })
     callback(e, data)
   }
+}
+
+utils.unique = function (ar) {
+  var values = {}
+
+  ar.forEach(function (el) {
+    values[el] = true
+  })
+
+  return Object.keys(values)
 }
