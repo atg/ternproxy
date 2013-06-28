@@ -62,8 +62,8 @@ utils.find.defs = function (dir, libs) {
 utils.http.respond = function (req, res) {
   return function (e, data, status) {
     if(e) log.onError(e)
-    log.res(req, res, data)
-
+    if(res.finished) return
+    
     if(!e && typeof status !== 'number') status = 200
     if(e && typeof status !== 'number') status = 500
 
@@ -72,6 +72,7 @@ utils.http.respond = function (req, res) {
 
     res.statusCode = status
     res.end(isObj ? JSON.stringify(data) : data)
+    log.res(req, res, data)
   }
 }
 

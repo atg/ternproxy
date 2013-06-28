@@ -11,6 +11,7 @@ module.exports.onError = function (e, res) {
 
 module.exports.req = function (req) {
   if(!verbose) return
+  req.__start = Date.now()
   var log = ''
   
   log += '\n+------------------------------------------+'
@@ -38,9 +39,10 @@ module.exports.req = function (req) {
 module.exports.res = function (req, res, data) {
   if(!verbose) return
   var log = ''
+  var ms = Date.now() - req.__start
   
   log += '\n+------------------------------------------+'
-  log += interpolate('\n| <= %s%s|\n', req.url, toSpaces(req.url.length + 4))
+  log += interpolate('\n| <= %s %sms %s|\n', req.url, ms, toSpaces(ms.toString().length + req.url.length + 8))
   log += '+------------------------------------------+'
   
   if(module.exports.res[req.url]) log = module.exports.res[req.url](data, log)
@@ -53,7 +55,7 @@ module.exports.res = function (req, res, data) {
 module.exports.res['/file/complete'] = function (body, log) {
   if(!body || !body.completions) return
   return log.concat(body.completions.map(function (completion) {
-    return interpolate('\n| (%s) %s = %s (%s)', completion.depth, completion.name, completion.type, completion.origin)
+    return interpolate('\n| (%s) %s = %s', completion.depth, completion.name, completion.type)
   }).join())
 }
 

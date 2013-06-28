@@ -1,10 +1,10 @@
 {
   "name": "ternproxy",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "src/daemon.js",
   "license": "Unlicense",
   "dependencies": {
-    "tern": "git://github.com/marijnh/tern.git",
+    "tern": "git://github.com/ramitos/tern.git",
     "formidable": "1.0.x",
     "deepmerge": "0.2.x",
     "optimist": "0.5.x",

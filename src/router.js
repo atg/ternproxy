@@ -9,8 +9,18 @@ module.exports = function () {
     post: {},
     get: {}
   }
+  
+  var timeout = function (req, res) {
+    return function () {
+      if(res.finished) return 0
+      res.statusCode = 408
+      res.end()
+    }
+  }
 
   var process = function (req, res) {
+    setTimeout(timeout(req, res), 500)
+    
     return function () {
       var form = new formidable.IncomingForm()
       var method = req.method.toLowerCase()

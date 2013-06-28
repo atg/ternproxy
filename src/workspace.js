@@ -1,4 +1,5 @@
-var utils = require('./utils'),
+var condense = require('tern/lib/condense'),
+    utils = require('./utils'),
     path = require('path'),
     tern = require('tern'),
     fs = require('fs')
@@ -58,4 +59,17 @@ workspace.prototype.clean = function (id) {
   return function () {
     self.cache[id] = undefined
   }
+}
+
+workspace.prototype.condense = function (file, content, callback) {
+  var self = this
+  self.tern.addFile(file, content)
+  var result = condense.condense([file], file, {spans: true})
+  self.tern.delFile(file)
+  callback(null, result)
+  self.tern.flush(function (e) {
+    var result = condense.condense([file], file, {spans: true})
+    self.tern.delFile(file)
+    callback(null, result)
+  })
 }

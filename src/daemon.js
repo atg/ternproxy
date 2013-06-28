@@ -4,16 +4,14 @@ var events = require('events').EventEmitter,
     proxy = require('./proxy'),
     utils = require('./utils'),
     posix = require('posix'),
+    tags = require('./tags'),
     log = require('./log'),
     http = require('http')
 
 
 
 
-var server = http.createServer(router).on('connection', function(socket) {
-  //limit the timeout to 1000ms. Node.js default is 120000ms
-  socket.setTimeout(1000)
-}).listen(8542, function () {
+var server = http.createServer(router).listen(8542, function () {
   module.exports.emit('listening')
   module.exports.listening = true
   log('HTTP server running')
@@ -125,9 +123,10 @@ router.post('/file/complete', function (req, res) {
  *   {string} origin
  */
 router.post('/definition', function (req, res) {
-  if(!req.body.project_dir) var workspace = proxy.workspace.find(req.body)
-  else var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+  var workspace = null
   
+  if(!req.body.project_dir) workspace = proxy.workspace.find(req.body)
+  else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
   
   workspace.tern.request({
@@ -166,9 +165,10 @@ router.post('/definition', function (req, res) {
  *   {string} origin
  */
 router.post('/type', function (req, res) {
-  if(!req.body.project_dir) var workspace = proxy.workspace.find(req.body)
-  else var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+  var workspace = null
   
+  if(!req.body.project_dir) workspace = proxy.workspace.find(req.body)
+  else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
   workspace.tern.request({
@@ -195,9 +195,10 @@ router.post('/type', function (req, res) {
  *   {string} origin
  */
 router.post('/documentation', function (req, res) {
-  if(!req.body.project_dir) var workspace = proxy.workspace.find(req.body)
-  else var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+  var workspace = null
   
+  if(!req.body.project_dir) workspace = proxy.workspace.find(req.body)
+  else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
   workspace.tern.request({
@@ -226,9 +227,10 @@ router.post('/documentation', function (req, res) {
  *     {number} end
  */
 router.post('/refs', function (req, res) {
-  if(!req.body.project_dir) var workspace = proxy.workspace.find(req.body)
-  else var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+  var workspace = null
   
+  if(!req.body.project_dir) workspace = proxy.workspace.find(req.body)
+  else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
   workspace.tern.request({
@@ -236,9 +238,24 @@ router.post('/refs', function (req, res) {
     query: {
       type: 'refs',
       end: req.body.cursor_position,
-      file: file
+      file: '#0'
     }
   }, utils.http.respond(req, res))
+})
+
+
+router.post('/tags', function (req, res) {
+  var workspace = null
+  
+  if(!req.body.project_dir) workspace = proxy.workspace.find(req.body)
+  else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
+  
+  var content = proxy.file(req.body).pop().text
+  
+  workspace.condense(req.body.path, content, function (e, condense) {
+    utils.http.respond(req, res)(null, tags(condense, content), 200)
+  })
 })
 
 
@@ -258,9 +275,10 @@ router.post('/refs', function (req, res) {
  *     {string} text
  */
 router.post('/rename', function (req, res) {
-  if(!req.body.project_dir) var workspace = proxy.workspace.find(req.body)
-  else var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+  var workspace = null
   
+  if(!req.body.project_dir) workspace = proxy.workspace.find(req.body)
+  else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
   workspace.tern.request({
