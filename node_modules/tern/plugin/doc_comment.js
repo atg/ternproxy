@@ -1,9 +1,4 @@
-// Parses comments above variable declarations, function declarations,
-// and object properties as docstrings and JSDoc-style type
-// annotations.
-
-var hljs = require('highlight.js'),
-    marked = require('marked');
+var marked = require('marked');
 
 marked.setOptions({
   gfm: true,
@@ -13,13 +8,124 @@ marked.setOptions({
   sanitize: true,
   smartLists: true,
   smartypants: true,
-  langPrefix: 'language-',
-  highlight: function (code, lang) {
-    if(lang) return hljs.highlight(lang, code).value;
-    return hljs.highlightAuto(code).value;
-  }
+  langPrefix: 'language-'
 });
 
+function parseTagTypes (str) {
+  return str.replace(/[{}]/g, '').split(/ *[|,\/] */);
+};
+
+function parseTag (str) {
+  var tag = {}
+    , parts = str.split(/ +/)
+    , type = tag.type = parts.shift().replace('@', '');
+
+  switch (type) {
+    case 'param':
+      tag.types = parseTagTypes(parts.shift());
+      tag.name = parts.shift() || '';
+      tag.description = parts.join(' ');
+      break;
+    case 'return':
+      tag.types = parseTagTypes(parts.shift());
+      tag.description = parts.join(' ');
+      break;
+    case 'see':
+      if (~str.indexOf('http')) {
+        tag.title = parts.length > 1
+          ? parts.shift()
+          : '';
+        tag.url = parts.join(' ');
+      } else {
+        tag.local = parts.join(' ');
+      }
+    case 'api':
+      tag.visibility = parts.shift();
+      break;
+    case 'type':
+      tag.types = parseTagTypes(parts.shift());
+      break;
+    case 'memberOf':
+      tag.parent = parts.shift();
+      break;
+    case 'augments':
+      tag.otherClass = parts.shift();
+      break;
+    case 'borrows':
+      tag.otherMemberName = parts.join(' ').split(' as ')[0];
+      tag.thisMemberName = parts.join(' ').split(' as ')[1];
+      break;
+    case 'throws':
+      tag.types = parseTagTypes(parts.shift());
+      tag.description = parts.join(' ');
+      break;
+    default:
+      tag.string = parts.join(' ');
+      break;
+  }
+
+  return tag;
+};
+
+var cleanLineBreaks = function (html) {
+  var start = new RegExp('<pre>','gmi');
+  var end = new RegExp('</pre>','gmi');
+  var isPre = new RegExp('^<pre>');
+  var results = new Array();
+  var strings = [];
+  var last = 0;
+
+  while (start.exec(html)) {results.push(start.lastIndex)}
+  while (end.exec(html)) {results.push(end.lastIndex)}
+
+  if(!results.length) return html.replace(/\n/gm, '');
+
+  results = results.sort(function (a, b) {
+    return a - b;
+  })
+
+  results.forEach(function (index, i) {
+    if(i%2) return;
+    if((index-6 - last) >= 0) strings.push(html.substring(last, index-5));
+    last = results[i+1];
+    strings.push(html.substring(index-5, results[i+1]));
+  })
+
+  return strings.map(function (str) {
+    if(isPre.test(str)) return str;
+    return str.replace(/\n|<br>/gm, '');
+  }).join('');
+};
+
+var intoDOC = function (comments, aval, type) {
+  var str = comments.join('').split('\n').map(function (line) {
+    if(line.match(/^\s*$|^\*\s*$|^\s\*$|^\s\*\s*$/)) return ' '
+    return line.replace(/^\s\*\s|^\s\*|^\*\s|^\s|^\**$/, '')
+  }).join('\n');
+
+  var comment = {tags: []};
+  // parse comment body
+  comment.description = str.split('\n@')[0].trim();
+  // parse tags
+  if (~str.indexOf('\n@')) {
+    var tags = '@' + str.split('\n@').slice(1).join('\n@');
+    comment.tags = tags.split('\n').map(parseTag);
+    comment.isPrivate = comment.tags.some(function(tag){
+      return 'api' == tag.type && 'private' == tag.visibility;
+    });
+  };
+
+  if (!comment.description) return;
+  comment.description = marked(comment.description).trim();
+  comment.description = cleanLineBreaks(comment.description);
+  if (aval) aval.doc = comment.description;
+  if (type) type.doc = comment.description;
+};
+
+
+// Parses comments above variable declarations, function declarations,
+// and object properties as docstrings and JSDoc-style type
+// annotations.
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require("../lib/comment"),
@@ -84,74 +190,6 @@ marked.setOptions({
     }, infer.searchVisitor, scope);
   }
 
-  // (The MIT License)
-  //
-  // Copyright (c) 2011 TJ Holowaychuk <tj@vision-media.ca>
-  // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-  // The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-  // THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-  function parseTagTypes (str) {
-    return str.replace(/[{}]/g, '').split(/ *[|,\/] */);
-  }
-
-  // (The MIT License)
-  //
-  // Copyright (c) 2011 TJ Holowaychuk <tj@vision-media.ca>
-  // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-  // The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-  // THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-  function parseTag (str) {
-    var tag = {}
-      , parts = str.split(/ +/)
-      , type = tag.type = parts.shift().replace('@', '');
-
-    switch (type) {
-      case 'param':
-        tag.types = parseTagTypes(parts.shift());
-        tag.name = parts.shift() || '';
-        tag.description = parts.join(' ');
-        break;
-      case 'return':
-        tag.types = parseTagTypes(parts.shift());
-        tag.description = parts.join(' ');
-        break;
-      case 'see':
-        if (~str.indexOf('http')) {
-          tag.title = parts.length > 1
-            ? parts.shift()
-            : '';
-          tag.url = parts.join(' ');
-        } else {
-          tag.local = parts.join(' ');
-        }
-      case 'api':
-        tag.visibility = parts.shift();
-        break;
-      case 'type':
-        tag.types = parseTagTypes(parts.shift());
-        break;
-      case 'memberOf':
-        tag.parent = parts.shift();
-        break;
-      case 'augments':
-        tag.otherClass = parts.shift();
-        break;
-      case 'borrows':
-        tag.otherMemberName = parts.join(' ').split(' as ')[0];
-        tag.thisMemberName = parts.join(' ').split(' as ')[1];
-        break;
-      case 'throws':
-        tag.types = parseTagTypes(parts.shift());
-        tag.description = parts.join(' ');
-        break;
-      default:
-        tag.string = parts.join(' ');
-        break;
-    }
-
-    return tag;
-  }
-
   // COMMENT INTERPRETATION
   function interpretComments(node, comments, scope, aval, type) {
     jsdocInterpretComments(node, scope, aval, comments);
@@ -163,33 +201,7 @@ marked.setOptions({
     }
 
     if(!comments.length) return null;
-
-    var str = comments.join('').split('\n').map(function (line) {
-      if(line.match(/^\s*$|^\*\s*$|^\s\*$|^\s\*\s*$/)) return ' '
-      return line.replace(/^\s\*\s|^\s\*|^\*\s|^\s|^\**$/, '')
-    }).join('\n')
-
-    // (The MIT License)
-    //
-    // Copyright (c) 2011 TJ Holowaychuk <tj@vision-media.ca>
-    // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-    // The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-    // THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-    var comment = {tags: []};
-    // parse comment body
-    comment.description = str.split('\n@')[0].trim();
-    // parse tags
-    if (~str.indexOf('\n@')) {
-      var tags = '@' + str.split('\n@').slice(1).join('\n@');
-      comment.tags = tags.split('\n').map(parseTag);
-      comment.isPrivate = comment.tags.some(function(tag){
-        return 'api' == tag.type && 'private' == tag.visibility;
-      })
-    }
-
-    if(comment.description) comment.description = marked(comment.description).trim().replace(/\n/mg, '')
-    if (aval instanceof infer.AVal) aval.doc = comment.description;
-    if (type) type.doc = comment.description;
+    intoDOC(comments, aval instanceof infer.AVal, type)
   }
 
   // Parses a subset of JSDoc-style comments in order to include the
