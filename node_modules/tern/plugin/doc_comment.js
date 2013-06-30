@@ -1,70 +1,75 @@
-var marked = require('marked');
+var interpolate = require('util').format,
+    hljs = require('highlight.js'),
+    marked = require('marked'),
+    path = require('path');
 
+var css = interpolate('file://%s', path.join(__dirname, 'doc_comment.css'));
 marked.setOptions({
   gfm: true,
-  tables: true,
+  tables: false,
   breaks: true,
   pedantic: false,
   sanitize: true,
   smartLists: true,
   smartypants: true,
-  langPrefix: 'language-'
+  langPrefix: 'language-',
+  highlight: function (code, lang) {
+    if(lang) return hljs.highlight(lang, code).value;
+    return hljs.highlight('javascript', code).value;
+  }
 });
 
-function parseTagTypes (str) {
-  return str.replace(/[{}]/g, '').split(/ *[|,\/] */);
-};
+var addTagsTable = function (tags) {
+  var returns = '<hr>'
+  var types = {}
 
-function parseTag (str) {
-  var tag = {}
-    , parts = str.split(/ +/)
-    , type = tag.type = parts.shift().replace('@', '');
+  Object.keys(tags).sort(function (tag1, tag2) {
+    return tags[tag1].type.localeCompare(tags[tag2].type);
+  }).filter(function (tag) {
+    return tags[tag].type.search(/^return$|^param$|^throws$/) >= 0;
+  }).forEach(function (tag) {
+    tag = tags[tag];
+    if(!tag.type) return;
+    if(!types[tag.type]) types[tag.type] = [];
+    types[tag.type].push(tag);
+  })
 
-  switch (type) {
-    case 'param':
-      tag.types = parseTagTypes(parts.shift());
-      tag.name = parts.shift() || '';
-      tag.description = parts.join(' ');
-      break;
-    case 'return':
-      tag.types = parseTagTypes(parts.shift());
-      tag.description = parts.join(' ');
-      break;
-    case 'see':
-      if (~str.indexOf('http')) {
-        tag.title = parts.length > 1
-          ? parts.shift()
-          : '';
-        tag.url = parts.join(' ');
-      } else {
-        tag.local = parts.join(' ');
+  Object.keys(types).forEach(function (type) {
+    returns += interpolate('<p class=\'tag\'><strong>%ss</strong></p><table><tbody>', type);
+    var tags = types[type];
+
+    returns += interpolate('%s</tbody></table>', tags.map(function (tag) {
+      if(tag.types && Array.isArray(tag.types)) tag.types = tag.types.map(function (type) {
+        return interpolate('<code>%s</code>', type);
+      }).filter(function (type) {
+        return !!type;
+      }).join(',');
+
+      switch(tag.type) {
+        case 'return':
+          var description = tag.description ? marked(tag.description).trim().replace(/\n/, '').replace(/^<p>|<\/p>$/gm, '') : '';
+          if(tag.types) return interpolate('<tr><td>%s</td><td>%s</td></tr>', tag.types, description);
+          break;
+        case 'returns':
+          var description = tag.description ? marked(tag.description).trim().replace(/\n/, '').replace(/^<p>|<\/p>$/gm, '') : '';
+          if(tag.types) return interpolate('<tr><td>%s</td><td>%s</td></tr>', tag.types, description);
+          break;
+        case 'param':
+          var description = tag.description ? marked(tag.description).trim().replace(/\n/, '').replace(/^<p>|<\/p>$/gm, '') : '';
+          var name = tag.name ? interpolate('<code>%s</code>', tag.name) : '';
+          if(tag.types) return interpolate('<tr><td>%s</td><td>%s</td><td>%s</td></tr>', tag.types, name, description);
+          break;
+        case 'throws':
+          var description = tag.description ? marked(tag.description).trim().replace(/\n/, '').replace(/^<p>|<\/p>$/gm, '') : '';
+          if(tag.types) return interpolate('<tr><td>%s</td><td>%s</td></tr>', tag.types, description);
+          break;
       }
-    case 'api':
-      tag.visibility = parts.shift();
-      break;
-    case 'type':
-      tag.types = parseTagTypes(parts.shift());
-      break;
-    case 'memberOf':
-      tag.parent = parts.shift();
-      break;
-    case 'augments':
-      tag.otherClass = parts.shift();
-      break;
-    case 'borrows':
-      tag.otherMemberName = parts.join(' ').split(' as ')[0];
-      tag.thisMemberName = parts.join(' ').split(' as ')[1];
-      break;
-    case 'throws':
-      tag.types = parseTagTypes(parts.shift());
-      tag.description = parts.join(' ');
-      break;
-    default:
-      tag.string = parts.join(' ');
-      break;
-  }
+    }).filter(function (tag) {
+      return tag && tag.length;
+    }).join(''));
+  });
 
-  return tag;
+  return returns.trim();
 };
 
 var cleanLineBreaks = function (html) {
@@ -82,19 +87,56 @@ var cleanLineBreaks = function (html) {
 
   results = results.sort(function (a, b) {
     return a - b;
-  })
+  });
 
   results.forEach(function (index, i) {
     if(i%2) return;
     if((index-6 - last) >= 0) strings.push(html.substring(last, index-5));
     last = results[i+1];
     strings.push(html.substring(index-5, results[i+1]));
-  })
+  });
 
   return strings.map(function (str) {
     if(isPre.test(str)) return str;
     return str.replace(/\n|<br>/gm, '');
   }).join('');
+};
+
+function parseTagTypes (str) {
+  return str.replace(/[{}]/g, '').split(/ *[|,\/] */);
+}
+
+function parseTag (str) {
+  var tag = {}
+    , parts = str.split(/ +/)
+    , type = tag.type = parts.shift().replace('@', '');
+
+  switch (type) {
+    case 'param':
+      tag.types = parseTagTypes(parts.shift());
+      tag.name = parts.shift() || '';
+      tag.description = parts.join(' ');
+      break;
+    case 'return':
+      tag.types = parseTagTypes(parts.shift());
+      tag.description = parts.join(' ');
+      break;
+    case 'returns':
+      tag.type = 'return'
+      tag.types = parseTagTypes(parts.shift());
+      tag.description = parts.join(' ');
+      break;
+    case 'throws':
+      tag.type = 'throw'
+      tag.types = parseTagTypes(parts.shift());
+      tag.description = parts.join(' ');
+      break;
+    default:
+      tag.string = parts.join(' ');
+      break;
+  }
+
+  return tag;
 };
 
 var intoDOC = function (comments, aval, type) {
@@ -106,6 +148,7 @@ var intoDOC = function (comments, aval, type) {
   var comment = {tags: []};
   // parse comment body
   comment.description = str.split('\n@')[0].trim();
+  if (!comment.description) return;
   // parse tags
   if (~str.indexOf('\n@')) {
     var tags = '@' + str.split('\n@').slice(1).join('\n@');
@@ -115,12 +158,24 @@ var intoDOC = function (comments, aval, type) {
     });
   };
 
-  if (!comment.description) return;
-  comment.description = marked(comment.description).trim();
-  comment.description = cleanLineBreaks(comment.description);
-  if (aval) aval.doc = comment.description;
-  if (type) type.doc = comment.description;
+  var doc = comment.description
+  var html = cleanLineBreaks(marked(comment.description).trim())
+  if(comment.tags) html += addTagsTable(comment.tags)
+  html = html.concat(interpolate('<link href=\'%s\' rel=\'stylesheet\' type=\'text/css\'>', css))
+
+  if (aval) {
+    aval.doc = doc
+    aval.html = html
+  }
+
+  if(type) {
+    type.doc = doc
+    type.html = html
+  }
 };
+
+
+/******************************************************************************/
 
 
 // Parses comments above variable declarations, function declarations,

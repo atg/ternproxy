@@ -33,10 +33,12 @@ router.post('/file/opened', function (req, res) {
 
 
 router.post('/file/closed', function (req, res) {
-  proxy.workspaces.filter(function (workspace) {
-    return !!workspace.cache[req.body.document_id]
+  Object.keys(proxy.workspaces).map(function (project_id) {
+    return proxy.workspaces[project_id]
+  }).filter(function (workspace) {
+    return workspace && !!workspace.cache[req.body.document_id]
   }).forEach(function (workspace) {
-    clearTimeout(workspace.cache[document_id].timeout)
+    clearTimeout(workspace.cache[req.body.document_id].timeout)
     workspace.clean(req.body.document_id)()
     if(!proxy.compact(workspace)) proxy.timeout(workspace.id)()
   })
