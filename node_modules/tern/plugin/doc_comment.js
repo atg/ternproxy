@@ -163,15 +163,8 @@ var intoDOC = function (comments, aval, type) {
   if(comment.tags) html += addTagsTable(comment.tags)
   html = html.concat(interpolate('<link href=\'%s\' rel=\'stylesheet\' type=\'text/css\'>', css))
 
-  if (aval) {
-    aval.doc = doc
-    aval.html = html
-  }
-
-  if(type) {
-    type.doc = doc
-    type.html = html
-  }
+  if (aval) aval.html = html
+  if (type) type.html = html
 };
 
 
