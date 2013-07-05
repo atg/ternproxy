@@ -296,7 +296,7 @@
   });
 
   var getInstance = exports.getInstance = function(obj, ctor) {
-    if (ctor == false) return new Obj(obj);
+    if (ctor === false) return new Obj(obj);
 
     if (!ctor) ctor = obj.hasCtor;
     if (!obj.instances) obj.instances = [];
@@ -674,10 +674,12 @@
 
   function maybeTagAsInstantiated(node, scope) {
     var score = scope.fnType.instantiateScore;
-    if (score && nodeSmallerThan(node, score * 5)) {
+    if (!disabledComputing && score && scope.fnType.args.length && nodeSmallerThan(node, score * 5)) {
       maybeInstantiate(scope.prev, score / 2);
       setFunctionInstantiated(node, scope);
       return true;
+    } else {
+      scope.fnType.instantiateScore = null;
     }
   }
 
