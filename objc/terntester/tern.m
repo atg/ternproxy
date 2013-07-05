@@ -152,8 +152,10 @@ static NSRange TernChangedRange(NSString* a, NSString* b, NSRange* newUnequal) {
 //    NSLog(@"uu = %@", [NSString stringWithFormat:@"http://localhost:8542%@", urlPath]);
     
     NSMutableDictionary* params = [postParameters mutableCopy];
-    [params setObject:proj.uuid forKey:@"project_id"];
-    [params setObject:proj.dir forKey:@"project_dir"];
+    if (proj.uuid)
+        [params setObject:proj.uuid forKey:@"project_id"];
+    if (proj.dir)
+        [params setObject:proj.dir forKey:@"project_dir"];
     
     if (fileContents)
         [params setObject:fileContents forKey:@"FILE"];
