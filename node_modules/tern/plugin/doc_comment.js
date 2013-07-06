@@ -141,8 +141,8 @@ function parseTag (str) {
 
 var intoDOC = function (comments, aval, type) {
   var str = comments.join('').split('\n').map(function (line) {
-    if(line.match(/^\s*$|^\*\s*$|^\s\*$|^\s\*\s*$/)) return ' '
-    return line.replace(/^\s\*\s|^\s\*|^\*\s|^\s|^\**$/, '')
+    if(line.match(/^\s*$|^\*\s*$|^\s*?\*$|^\s*?\*\s*$/)) return ' '
+    return line.replace(/^\s*?\*\s|^\s*?\*|^\*\s|^\s*?|^\**$/, '')
   }).join('\n');
 
   var comment = {tags: []};
