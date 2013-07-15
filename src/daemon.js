@@ -1,6 +1,4 @@
-var events = require('events').EventEmitter,
-    inherits = require('util').inherits,
-    router = require('./router')(),
+var router = require('./router')(),
     proxy = require('./proxy'),
     utils = require('./utils'),
     posix = require('posix'),
@@ -308,5 +306,5 @@ router.get('/ping', function (req, res) {
 
 // For testing purposes
 var emitter = function () {}
-inherits(emitter, events)
+require('util').inherits(emitter, require('events').EventEmitter)
 module.exports = new emitter()

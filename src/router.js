@@ -25,7 +25,7 @@ module.exports = function () {
       var form = new formidable.IncomingForm()
       var method = req.method.toLowerCase()
       form.encoding = 'utf-8'
-      
+
       if(!routes[method][req.url]) return utils.http.respond(req, res)(null, null, 404)
 
       form.parse(req, function(e, fields, files) {

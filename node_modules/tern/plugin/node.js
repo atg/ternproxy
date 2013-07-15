@@ -8,6 +8,7 @@
   "use strict";
 
   function resolvePath(base, path) {
+    if (path[0] == "/") return path;
     var slash = base.lastIndexOf("/"), m;
     if (slash >= 0) path = base.slice(0, slash + 1) + path;
     while (m = /[^\/]*[^\/\.][^\/]*\/\.\.\//.exec(path))
@@ -46,62 +47,29 @@
 
   // Assume node.js & access to local file system
   if (require) (function() {
-    var fs = require("fs"), path = require("path");
-    var win = /win/.test(process.platform);
+    var module_ = require("module"), path = require("path");
 
-    var resolve = path.resolve;
-    if (win) resolve = function(base, file) { return path.resolve(base, file).replace(/\\/g, "/"); };
-
-    function findModuleDir(server) {
-      if (server._node.moduleDir !== undefined) return server._node.moduleDir;
-      var dir = server.options.projectDir || "";
-      if (win) dir = dir.replace(/\\/g, "/");
-
-      for (;;) {
-        var modDir = resolve(dir, "node_modules");
-
-        try {
-          if (fs.statSync(modDir).isDirectory()) return server._node.moduleDir = modDir;
-        } catch(e) {}
-        var end = dir.lastIndexOf("/");
-        if (end <= 0) return server._node.moduleDir = null;
-        dir = dir.slice(0, end);
-      }
-    }
-
-    resolveModule = function(server, name, relative) {
-      var data = server._node, dir = server.options.projectDir || "";
+    resolveModule = function(server, name, parent) {
+      var data = server._node;
       if (data.options.dontLoad == true ||
           data.options.dontLoad && new RegExp(data.options.dontLoad).test(name) ||
           data.options.load && !new RegExp(data.options.load).test(name))
         return infer.ANull;
 
-      var file = name;
-      if (!relative) {
-        var modDir = findModuleDir(server);
-        if (!modDir) return infer.ANull;
-        file = resolve(modDir, file);
-      }
-
+      var currentModule = {
+        id: parent,
+        paths: module_._nodeModulePaths(path.dirname(parent))
+      };
       try {
-        var pkg = JSON.parse(fs.readFileSync(resolve(modDir, file + "/package.json")));
-      } catch(e) {}
-      if (pkg && pkg.main) {
-        file += "/" + pkg.main;
-      } else {
-        try {
-          if (fs.statSync(resolve(dir, file)).isDirectory())
-            file += "/index.js";
-        } catch(e) {}
-      }
-      if (!/\.js$/.test(file)) file += ".js";
-
-      try {
-        if (!fs.statSync(resolve(dir, file)).isFile()) return infer.ANull;
+        var file = module_._resolveFilename(name, currentModule);
       } catch(e) { return infer.ANull; }
-
-      server.addFile(file);
-      return data.modules[file] = data.modules[name] = new infer.AVal;
+      var known = data.modules[file];
+      if (known) {
+        return data.modules[name] = known;
+      } else {
+        server.addFile(file);
+        return data.modules[file] = data.modules[name] = new infer.AVal;
+      }
     };
   })();
 
@@ -126,7 +94,7 @@
       infer.def.load(data.options.modules[name], scope);
       result = data.modules[name] = exportsFromScope(scope);
     } else {
-      result = resolveModule(server, name, relative);
+      result = resolveModule(server, name, data.currentFile);
     }
     return argNodes[0].required = result;
   });
@@ -140,7 +108,7 @@
     };
 
     server.on("beforeLoad", function(file) {
-      this._node.currentFile = file.name.replace(/\\/g, "/");
+      this._node.currentFile = resolvePath(server.options.projectDir + "/", file.name.replace(/\\/g, "/"));
       file.scope = buildWrappingScope(file.scope, file.name, file.ast);
     });
 
@@ -154,6 +122,33 @@
     });
 
     return {defs: defs};
+  });
+
+  tern.defineQueryType("node_exports", {
+    takesFile: true,
+    run: function(server, query, file) {
+      function describe(aval) {
+        var target = {}, type = aval.getType(false);
+        target.type = infer.toString(type, 3);
+        var doc = aval.doc || (type && type.doc), url = aval.url || (type && type.url);
+        if (doc) target.doc = doc;
+        if (url) target.url = url;
+        var span = tern.getSpan(aval) || (type && tern.getSpan(type));
+        if (span) tern.storeSpan(server, query, span, target);
+        return target;
+      }
+
+      var known = server._node.modules[file.name];
+      if (!known) return {};
+      var type = known.getType(false);
+      var resp = describe(known);
+      if (type instanceof infer.Obj) {
+        var props = resp.props = {};
+        for (var prop in type.props)
+          props[prop] = describe(type.props[prop]);
+      }
+      return resp;
+    }
   });
 
   var defs = {
