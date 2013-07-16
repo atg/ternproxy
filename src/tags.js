@@ -52,7 +52,7 @@ var tagger = function (lines, condense, tags, parent, name) {
     qualified_name: p.join('::'),
     type_code: type_code(type),
     parent_name: parent.join('::'),
-    range_line: r.line+1,
+    range_line: r.line,
     range_column: r.column,
     range_length: r.length,
     line_content: lines[r.line]
