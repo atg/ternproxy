@@ -15,10 +15,19 @@ utils.load = noop
 utils.get = noop
 utils.http = noop
 
+var def_cfg =  (function () {
+  var file = path.join(process.env.HOME, '.tern-project')
+  if(fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, 'utf8'))
+})()
+
 
 utils.get.config = function (dir) {
+  var file = path.join(dir, '.tern-project')
+  
+  if(!fs.existsSync(file) && def_cfg) return def_cfg
+  
   var config = tryor(function() {
-      return fs.readFileSync(path.join(dir, '.tern-project'), 'utf8')
+      return fs.readFileSync(file, 'utf8')
   }, "{}")
 
   var merged = merge(JSON.parse(config), present)
