@@ -69,9 +69,7 @@ workspace.prototype.condense = function (file, content, callback) {
     name: file,
     text: content,
     type: 'full'
-  }]}, function (e) {
-    if(e) return log.onError(new Error(e))
-  })
+  }]}, function () {})
   
   self.tern.flush(function (e) {
     if(e) return callback(e)

@@ -3,7 +3,7 @@ module.exports = function (condense, content) {
   var tags = []
   
   Object.keys(condense).forEach(function (name) {
-    tagger( condense[name], tags, [], name)
+    tagger(content.split('\n'), condense[name], tags, [], name)
   })
   
   return tags.sort(function (tag1, tag2) {
@@ -31,7 +31,7 @@ var type_code = function (type) {
   else return 'variable'
 }
 
-var tagger = function (condense, tags, parent, name) {
+var tagger = function (lines, condense, tags, parent, name) {
   if(typeof condense !== 'object' || name.match(/^\!/)) return 0
   var type = condense['!type']
   var span = condense['!span']
@@ -40,7 +40,7 @@ var tagger = function (condense, tags, parent, name) {
   
   Object.keys(condense).forEach(function (key) {
     if(key.match(/^\!/)) return 0
-    tagger(condense[key], tags, p, key)
+    tagger(lines, condense[key], tags, p, key)
   })
   
   if(!span || !type) return 0
@@ -52,8 +52,9 @@ var tagger = function (condense, tags, parent, name) {
     qualified_name: p.join('::'),
     type_code: type_code(type),
     parent_name: parent.join('::'),
-    range_line: r.line,
+    range_line: r.line+1,
     range_column: r.column,
-    range_length: r.length
+    range_length: r.length,
+    line_content: lines[r.line]
   })
 }
