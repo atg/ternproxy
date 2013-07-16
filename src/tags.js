@@ -6,9 +6,11 @@ module.exports = function (condense, content) {
     tagger(content.split('\n'), condense[name], tags, [], name)
   })
   
-  return tags.sort(function (tag1, tag2) {
-    return tag1.range_line - tag2.range_line
-  })
+  return {
+    tags: tags.sort(function (tag1, tag2) {
+      return tag1.range_line - tag2.range_line
+    })
+  }
 }
 
 var range = function (span) {
