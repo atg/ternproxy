@@ -125,7 +125,7 @@ router.post('/file/complete', function (req, res) {
 router.post('/definition', function (req, res) {
   var workspace = null
   
-  if(!req.body.project_dir) workspace = proxy.workspace.find(req.body)
+  if(!req.body.project_dir) workspace = proxy.workspace.find_by_id(req.body)
   else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
   
@@ -167,7 +167,7 @@ router.post('/definition', function (req, res) {
 router.post('/type', function (req, res) {
   var workspace = null
   
-  if(!req.body.project_dir) workspace = proxy.workspace.find(req.body)
+  if(!req.body.project_dir) workspace = proxy.workspace.find_by_id(req.body)
   else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
@@ -197,7 +197,7 @@ router.post('/type', function (req, res) {
 router.post('/documentation', function (req, res) {
   var workspace = null
   
-  if(!req.body.project_dir) workspace = proxy.workspace.find(req.body)
+  if(!req.body.project_dir) workspace = proxy.workspace.find_by_id(req.body)
   else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
@@ -229,7 +229,7 @@ router.post('/documentation', function (req, res) {
 router.post('/refs', function (req, res) {
   var workspace = null
   
-  if(!req.body.project_dir) workspace = proxy.workspace.find(req.body)
+  if(!req.body.project_dir) workspace = proxy.workspace.find_by_id(req.body)
   else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 
@@ -247,8 +247,13 @@ router.post('/refs', function (req, res) {
 router.post('/tags', function (req, res) {
   var workspace = null
   
-  if(!req.body.project_dir) workspace = proxy.workspace.find(req.body)
-  else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+  if(!req.body.project_dir && req.body.project_id && req.body.path)
+    workspace = proxy.workspace.find_by_id(req.body)
+  else if(req.body.project_dir && !req.body.project_id)
+    workspace = proxy.workspace.find_by_dir(req.body.project_dir)
+  else
+    workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
   
   var content = proxy.file(req.body).pop().text
@@ -277,7 +282,7 @@ router.post('/tags', function (req, res) {
 router.post('/rename', function (req, res) {
   var workspace = null
   
-  if(!req.body.project_dir) workspace = proxy.workspace.find(req.body)
+  if(!req.body.project_dir) workspace = proxy.workspace.find_by_id(req.body)
   else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
   if(!workspace) return utils.http.respond(req, res)(null, '', 304)
 

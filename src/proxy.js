@@ -16,7 +16,7 @@ proxy.workspace = function (project_id, project_dir) {
   return proxy.workspaces[project_id]
 }
 
-proxy.workspace.find = function (info) {
+proxy.workspace.find_by_id = function (info) {
   var project_ids = Object.keys(proxy.workspaces).filter(function (project_id) {
     return info.path.lastIndexOf(proxy.workspaces[project_id].dir, 0) === 0
   }).sort(function(pid1, pid2) {
@@ -32,6 +32,14 @@ proxy.workspace.find = function (info) {
   var project_id = info.project_id
   
   return proxy.workspaces[project_id] = new workspace(project_dir, project_id, proxy.timeout(project_id), 300000)
+}
+
+proxy.workspace.find_by_dir = function (dir) {
+  var project_ids = Object.keys(proxy.workspaces).filter(function (project_id) {
+    return proxy.workspaces[project_id].dir === dir
+  })
+  
+  if(project_ids.length) return proxy.workspaces[project_ids.shift()]
 }
 
 proxy.timeout = function (id) {
