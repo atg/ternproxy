@@ -62,16 +62,32 @@ workspace.prototype.clean = function (id) {
   }
 }
 
-workspace.prototype.condense = function (file, content, callback) {
-  var self = this
+workspace.prototype.condense = module.exports.condense = function (file, content, dir, callback) {
+  var config = (function () {
+    if(!(this instanceof workspace)) return {getFile: utils.get.file, async: true}
+    
+    var plugins = JSON.parse(JSON.stringify(this.config.plugins))
+    plugins.node = undefined
+    plugins = JSON.parse(JSON.stringify(plugins))
+    
+    return {
+      getFile: utils.get.file,
+      async: true,
+      defs: this.defs,
+      plugins: this.config.plugins,
+      projectDir: this.dir
+    }
+  })(this)
   
-  self.tern.request({files: [{
+  var server = new tern.Server(config)
+  
+  server.request({files: [{
     name: file,
     text: content,
     type: 'full'
-  }]}, function () {})
+  }]}, utils.noop)
   
-  self.tern.flush(function (e) {
+  server.flush(function (e) {
     if(e) return callback(e)
     callback(null, condense.condense(file, file, {spans: true}))
   })

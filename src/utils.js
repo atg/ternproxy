@@ -14,6 +14,7 @@ utils.find = noop
 utils.load = noop
 utils.get = noop
 utils.http = noop
+utils.noop = noop
 
 var def_cfg =  (function () {
   var file = path.join(process.env.HOME, '.tern-project')

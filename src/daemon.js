@@ -1,4 +1,5 @@
-var router = require('./router')(),
+var condense = require('./workspace').condense,
+    router = require('./router')(),
     proxy = require('./proxy'),
     utils = require('./utils'),
     posix = require('posix'),
@@ -247,20 +248,23 @@ router.post('/refs', function (req, res) {
 router.post('/tags', function (req, res) {
   var workspace = null
   
-  if(!req.body.project_dir && req.body.project_id && req.body.path)
-    workspace = proxy.workspace.find_by_id(req.body)
-  else if(req.body.project_dir && !req.body.project_id)
-    workspace = proxy.workspace.find_by_dir(req.body.project_dir)
-  else
-    workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-
-  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
+  var id = req.body.project_id
+  var dir = req.body.project_dir
+  var path = req.body.path
+  
+  if(!dir && id && path) workspace = proxy.workspace.find_by_id(req.body)
+  else if(dir && !id) workspace = proxy.workspace.find_by_dir(dir)
+  else workspace = proxy.workspace(id, dir)
   
   var content = proxy.file(req.body).pop().text
   
-  workspace.condense(req.body.path, content, function (e, condense) {
+  var callback = function (e, condense) {
+    if(e) return utils.http.respond(req, res)(e)
     utils.http.respond(req, res)(null, tags(condense, content), 200)
-  })
+  }
+  
+  if(workspace) return workspace.condense(path, content, dir, callback)
+  condense(path, content, dir, callback)
 })
 
 
