@@ -296,7 +296,7 @@ router.post('/rename', function (req, res) {
       type: 'rename',
       end: req.body.cursor_position,
       newName: req.body.new_name,
-      file: file
+      file: '#0'
     }
   }, utils.http.respond(req, res))
 })
