@@ -103,3 +103,9 @@ utils.unique = function (ar) {
 
   return Object.keys(values)
 }
+
+utils.defined = function () {
+  return Array.prototype.every.call(arguments, function (el) {
+    return (typeof el !== 'undefined') && (el !== null)
+  })
+}

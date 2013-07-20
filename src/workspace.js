@@ -7,6 +7,8 @@ var condense = require('tern/lib/condense'),
 
 
 var workspace = module.exports = function (dir, id, callback, tolerance) {
+  if(!(this instanceof workspace)) return new workspace(dir, id, callback, tolerance)
+  
   var self = this
   
   self.id = id

@@ -24,7 +24,7 @@ setInterval(function () {
 
 
 router.post('/file/opened', function (req, res) {
-  var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
+  var workspace = proxy.workspace(req.body)
 
   workspace.file(req.body.document_id, req.body.FILE)
   utils.http.respond(req, res)(null, 'Document opened')
@@ -82,11 +82,11 @@ router.post('/file/closed', function (req, res) {
  *     {} origin
  */
 router.post('/file/complete', function (req, res) {
-  var workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
+  var workspace = proxy.workspace(req.body)
+  if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
   
   workspace.tern.request({
-    files: proxy.file(req.body),
+    files: proxy.file(req.body, workspace),
     query: {
       type: 'completions',
       file: '#0',
@@ -124,14 +124,11 @@ router.post('/file/complete', function (req, res) {
  *   {string} origin
  */
 router.post('/definition', function (req, res) {
-  var workspace = null
-  
-  if(!req.body.project_dir) workspace = proxy.workspace.find_by_id(req.body)
-  else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
+  var workspace = proxy.workspace(req.body)
+  if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
   
   workspace.tern.request({
-    files: proxy.file(req.body),
+    files: proxy.file(req.body, workspace),
     query: {
       type: 'definition',
       end: req.body.cursor_position,
@@ -166,14 +163,11 @@ router.post('/definition', function (req, res) {
  *   {string} origin
  */
 router.post('/type', function (req, res) {
-  var workspace = null
-  
-  if(!req.body.project_dir) workspace = proxy.workspace.find_by_id(req.body)
-  else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
+  var workspace = proxy.workspace(req.body)
+  if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
 
   workspace.tern.request({
-    files: proxy.file(req.body),
+    files: proxy.file(req.body, workspace),
     query: {
       type: 'type',
       end: req.body.cursor_position,
@@ -196,14 +190,11 @@ router.post('/type', function (req, res) {
  *   {string} origin
  */
 router.post('/documentation', function (req, res) {
-  var workspace = null
-  
-  if(!req.body.project_dir) workspace = proxy.workspace.find_by_id(req.body)
-  else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
+  var workspace = proxy.workspace(req.body)
+  if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
 
   workspace.tern.request({
-    files: proxy.file(req.body),
+    files: proxy.file(req.body, workspace),
     query: {
       type: 'documentation',
       end: req.body.cursor_position,
@@ -228,14 +219,11 @@ router.post('/documentation', function (req, res) {
  *     {number} end
  */
 router.post('/refs', function (req, res) {
-  var workspace = null
-  
-  if(!req.body.project_dir) workspace = proxy.workspace.find_by_id(req.body)
-  else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
+  var workspace = proxy.workspace(req.body)
+  if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
 
   workspace.tern.request({
-    files: proxy.file(req.body),
+    files: proxy.file(req.body, workspace),
     query: {
       type: 'refs',
       end: req.body.cursor_position,
@@ -246,25 +234,18 @@ router.post('/refs', function (req, res) {
 
 
 router.post('/tags', function (req, res) {
-  var workspace = null
-  
-  var id = req.body.project_id
+  var workspace = proxy.workspace(req.body)
+  var content = proxy.file(req.body, workspace).pop().text
   var dir = req.body.project_dir
-  var path = req.body.path
-  
-  if(!dir && id && path) workspace = proxy.workspace.find_by_id(req.body)
-  else if(dir && !id) workspace = proxy.workspace.find_by_dir(dir)
-  else workspace = proxy.workspace(id, dir)
-  
-  var content = proxy.file(req.body).pop().text
+  var file = req.body.path
   
   var callback = function (e, condense) {
     if(e) return utils.http.respond(req, res)(e)
     utils.http.respond(req, res)(null, tags(condense, content), 200)
   }
   
-  if(workspace) return workspace.condense(path, content, dir, callback)
-  condense(path, content, dir, callback)
+  if(workspace) workspace.condense(file, content, dir, callback)
+  else condense(file, content, dir, callback)
 })
 
 
@@ -284,14 +265,11 @@ router.post('/tags', function (req, res) {
  *     {string} text
  */
 router.post('/rename', function (req, res) {
-  var workspace = null
-  
-  if(!req.body.project_dir) workspace = proxy.workspace.find_by_id(req.body)
-  else workspace = proxy.workspace(req.body.project_id, req.body.project_dir)
-  if(!workspace) return utils.http.respond(req, res)(null, '', 304)
+  var workspace = proxy.workspace(req.body)
+  if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
 
   workspace.tern.request({
-    files: proxy.file(req.body),
+    files: proxy.file(req.body, workspace),
     query: {
       type: 'rename',
       end: req.body.cursor_position,

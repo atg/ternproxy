@@ -9,37 +9,38 @@ var proxy = module.exports = {
   workspaces: {}
 }
 
-proxy.workspace = function (project_id, project_dir) {
-  if(proxy.workspaces[project_id]) proxy.workspaces[project_id].extend()
-  else proxy.workspaces[project_id] = new workspace(project_dir, project_id, proxy.timeout(project_id))
-
+var get_workspace = function (project_dir, project_id, exists) {
+  if(exists) {
+    proxy.workspaces[project_id].extend()
+    return proxy.workspaces[project_id]
+  }
+  
+  var timeout = proxy.timeout(project_id)
+  proxy.workspaces[project_id] = workspace(project_dir, project_id, timeout)
   return proxy.workspaces[project_id]
 }
 
-proxy.workspace.find_by_id = function (info) {
-  var project_ids = Object.keys(proxy.workspaces).filter(function (project_id) {
-    return info.path.lastIndexOf(proxy.workspaces[project_id].dir, 0) === 0
-  }).sort(function(pid1, pid2) {
-    var p1 = proxy.workspaces[pid1].dir
-    var p2 = proxy.workspaces[pid2].dir
-    
-    return p2.length - p1.length;
-  })
-  
-  if(project_ids.length) return proxy.workspaces[project_ids.pop()]
-  
-  var project_dir = path.dirname(info.path)
+proxy.workspace = function (info) {
+  var project_dir = info.project_dir
   var project_id = info.project_id
+  var file = info.path
   
-  return proxy.workspaces[project_id] = new workspace(project_dir, project_id, proxy.timeout(project_id), 300000)
-}
+  if(utils.defined(project_id, proxy.workspaces[project_id]))
+    return get_workspace(project_dir, project_id, true)
 
-proxy.workspace.find_by_dir = function (dir) {
+  
+  if(utils.defined(project_id, project_dir))
+    return get_workspace(project_dir, project_id)
+  
+  if(utils.defined(project_id, file))
+    return get_workspace(path.dirname(info.path), project_id)
+  
   var project_ids = Object.keys(proxy.workspaces).filter(function (project_id) {
-    return proxy.workspaces[project_id].dir === dir
+    return proxy.workspaces[project_id].dir === project_dir
   })
   
-  if(project_ids.length) return proxy.workspaces[project_ids.shift()]
+  if(project_ids.length)
+    return get_workspace(project_dir, project_ids.shift(), true)
 }
 
 proxy.timeout = function (id) {
@@ -64,8 +65,7 @@ proxy.compact = function (workspace) {
   })
 }
 
-proxy.file = function (info) {
-  var workspace = proxy.workspace(info.project_id, info.project_dir)
+proxy.file = function (info, workspace) {
   var full = !!info.sending_full_content
   var offset = info.delta_offset
   var length = info.delta_length
@@ -73,9 +73,14 @@ proxy.file = function (info) {
   var name = proxy.filename(info)
   var text = info.FILE || ''
   
-  if(!full) text = proxy.delta(workspace, document_id, offset, length, text)
-  if(text.length < info.cursor_position) info.cursor_position = text.length
-  if(full) workspace.file(document_id, text)
+  if(!full && utils.defined(workspace))
+    text = proxy.delta(workspace, document_id, offset, length, text)
+  
+  if(text.length < info.cursor_position)
+    info.cursor_position = text.length
+  
+  if(full && utils.defined(workspace))
+    workspace.file(document_id, text)
 
   return [{type: 'full', name: name, text: text}]
 }
