@@ -1,4 +1,4 @@
-var condense = require('./workspace').condense,
+var condense = require('./condense')(),
     router = require('./router')(),
     proxy = require('./proxy'),
     utils = require('./utils'),
@@ -11,8 +11,6 @@ var condense = require('./workspace').condense,
 
 
 var server = http.createServer(router).listen(8542, function () {
-  module.exports.emit('listening')
-  module.exports.listening = true
   log('HTTP server running')
 })
 
@@ -26,7 +24,7 @@ setInterval(function () {
 router.post('/file/opened', function (req, res) {
   var workspace = proxy.workspace(req.body)
 
-  workspace.file(req.body.document_id, req.body.FILE)
+  workspace.file(req.body.document_id, req.body.FILE, proxy.filename(req.body))
   utils.http.respond(req, res)(null, 'Document opened')
 })
 
@@ -84,7 +82,7 @@ router.post('/file/closed', function (req, res) {
 router.post('/file/complete', function (req, res) {
   var workspace = proxy.workspace(req.body)
   if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
-  
+
   workspace.tern.request({
     files: proxy.file(req.body, workspace),
     query: {
@@ -233,22 +231,6 @@ router.post('/refs', function (req, res) {
 })
 
 
-router.post('/tags', function (req, res) {
-  var workspace = proxy.workspace(req.body)
-  var content = proxy.file(req.body, workspace).pop().text
-  var dir = req.body.project_dir
-  var file = req.body.path
-  
-  var callback = function (e, condense) {
-    if(e) return utils.http.respond(req, res)(e)
-    utils.http.respond(req, res)(null, tags(condense, content), 200)
-  }
-  
-  if(workspace) workspace.condense(file, content, dir, callback)
-  else condense(file, content, dir, callback)
-})
-
-
 /*
  * Rename a variable in a scope-aware way
  *
@@ -280,6 +262,22 @@ router.post('/rename', function (req, res) {
 })
 
 
+router.post('/tags', function (req, res) {
+  var workspace = proxy.workspace(req.body)
+  var content = proxy.file(req.body, workspace).pop().text
+  var dir = req.body.project_dir
+  var file = req.body.path
+
+  var callback = function (e, condense) {
+    if(e) return utils.http.respond(req, res)(e)
+    utils.http.respond(req, res)(null, tags(condense, content), 200)
+  }
+
+  if(workspace) workspace.condense(file, content, dir, callback)
+  else condense(file, content, dir, callback)
+})
+
+
 router.get('/ping', function (req, res) {
   utils.http.respond(req, res)(null, {
     memory: process.memoryUsage(),
@@ -289,9 +287,3 @@ router.get('/ping', function (req, res) {
     cwd: process.cwd()
   })
 })
-
-
-// For testing purposes
-var emitter = function () {}
-require('util').inherits(emitter, require('events').EventEmitter)
-module.exports = new emitter()

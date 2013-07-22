@@ -14,8 +14,13 @@ marked.setOptions({
   smartypants: true,
   langPrefix: 'language-',
   highlight: function (code, lang) {
-    if(lang) return hljs.highlight(lang, code).value;
-    return hljs.highlight('javascript', code).value;
+    try {
+      if(lang) return hljs.highlight(lang, code).value;
+      return hljs.highlight('javascript', code).value;
+    } catch (e) {
+      console.log('Highlight ERROR', e)
+      return code
+    }
   }
 });
 
@@ -146,17 +151,32 @@ var intoDOC = function (comments, aval, type) {
   }).join('\n');
 
   var comment = {tags: []};
-  // parse comment body
   comment.description = str.split('\n@')[0].trim();
   if (!comment.description) return;
   // parse tags
+  // parse comment body
   if (~str.indexOf('\n@')) {
     var tags = '@' + str.split('\n@').slice(1).join('\n@');
     comment.tags = tags.split('\n').map(parseTag);
-    comment.isPrivate = comment.tags.some(function(tag){
-      return 'api' == tag.type && 'private' == tag.visibility;
-    });
-  };
+  } else {
+    var lines = str.split('\n')
+    var tags = str.match(/^\s*?@.*/mg)
+
+    if(tags) comment.tags = tags.map(function (str) {
+      var line = lines.indexOf(str)
+      if(line >= 0 && !lines[line+1].match(/^\s*?@.*/))
+        str += ' ' + lines[line+1].trim()
+
+      return parseTag(str.trim())
+    })
+
+    if(comment.tags) {
+      var first_tag = str.match(/^\s*?@.*/m)
+      var new_description = ''
+      if(first_tag) new_description = str.slice(0, first_tag.index)
+      if(new_description) comment.description = new_description.trim()
+    }
+  }
 
   var doc = comment.description
   var html = cleanLineBreaks(marked(comment.description).trim())

@@ -66,4 +66,5 @@ function toSpaces (length) {
   return new Array(length).join(' ')
 }
 
+process.removeListener('uncaughtException', module.exports.onError)
 process.on('uncaughtException', module.exports.onError)

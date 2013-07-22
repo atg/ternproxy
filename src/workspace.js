@@ -1,4 +1,5 @@
-var condense = require('tern/lib/condense'),
+var condense = require('./condense'),
+    lizard = require('./lizard'),
     utils = require('./utils'),
     log = require('./log'),
     path = require('path'),
@@ -9,28 +10,40 @@ var condense = require('tern/lib/condense'),
 var workspace = module.exports = function (dir, id, callback, tolerance) {
   if(!(this instanceof workspace)) return new workspace(dir, id, callback, tolerance)
   
-  var self = this
+  this.id = id
+  this.cache = {}
+  this.cache_index = {}
+  this.dir = path.resolve(dir)
+  this.tolerance = tolerance | 60000 //5m
+  this.callback = callback
+  this.extend()
   
-  self.id = id
-  self.cache = {}
-  self.dir = path.resolve(dir)
-  self.tolerance = tolerance | 1800000 //30m
-  self.config = utils.get.config(self.dir)
-  self.defs = utils.find.defs(self.dir, self.config.libs)
-  utils.get.plugins(self.config.plugins)
-  self.callback = callback
-  self.extend()
+  this.start(utils.get.config(this.dir))
   
-  self.tern = new tern.Server({
+  if(!this.config.defined) process.nextTick(function () {
+    this.lizard = lizard(this)
+  }.bind(this))
+
+  if(this.config.loadEagerly) config.loadEagerly.forEach(function (file) {
+    this.tern.addFile(file)
+  }.bind(this))
+}
+
+workspace.prototype.start = function (cfg, already_updated) {
+  if(!already_updated) {
+    this.defs = utils.find.defs(this.dir, cfg.libs)
+    utils.get.plugins(cfg.plugins)
+    this.config = cfg
+  }
+
+  if(utils.defined(this.tern)) this.tern.reset()
+
+  this.tern = new tern.Server({
     getFile: utils.get.file,
     async: true,
-    defs: self.defs,
-    plugins: self.config.plugins,
-    projectDir: self.dir
-  })
-  
-  if(self.config.loadEagerly) config.loadEagerly.forEach(function (file) {
-    self.tern.addFile(file)
+    defs: this.defs,
+    plugins: this.config.plugins,
+    projectDir: this.dir
   })
 }
 
@@ -39,8 +52,9 @@ workspace.prototype.extend = function () {
   this.timeout = setTimeout(this.callback, this.tolerance)
 }
 
-workspace.prototype.file = function (id, text) {
+workspace.prototype.file = function (id, text, name) {
   if(!id) return
+  if(utils.defined(name)) this.cache_index[id] = name
   
   if(this.cache[id]) clearTimeout(this.cache[id].timeout)
   
@@ -60,37 +74,10 @@ workspace.prototype.file = function (id, text) {
 workspace.prototype.clean = function (id) {
   var self = this
   return function () {
+    console.log('file timeout', self.cache_index[id])
+    self.tern.delFile(self.cache_index[id])
     self.cache[id] = undefined
   }
 }
 
-workspace.prototype.condense = module.exports.condense = function (file, content, dir, callback) {
-  var config = (function () {
-    if(!(this instanceof workspace)) return {getFile: utils.get.file, async: true}
-    
-    var plugins = JSON.parse(JSON.stringify(this.config.plugins))
-    plugins.node = undefined
-    plugins = JSON.parse(JSON.stringify(plugins))
-    
-    return {
-      getFile: utils.get.file,
-      async: true,
-      defs: this.defs,
-      plugins: this.config.plugins,
-      projectDir: this.dir
-    }
-  })(this)
-  
-  var server = new tern.Server(config)
-  
-  server.request({files: [{
-    name: file,
-    text: content,
-    type: 'full'
-  }]}, utils.noop)
-  
-  server.flush(function (e) {
-    if(e) return callback(e)
-    callback(null, condense.condense(file, file, {spans: true}))
-  })
-}
+workspace.prototype.condense = condense(workspace)

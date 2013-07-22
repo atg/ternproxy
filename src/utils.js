@@ -16,28 +16,25 @@ utils.get = noop
 utils.http = noop
 utils.noop = noop
 
-var def_cfg =  (function () {
-  var file = path.join(process.env.HOME, '.tern-project')
-  if(fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, 'utf8'))
-})()
+var parse_cfg = function (str) {
+  var cfg = JSON.parse(str)
+  cfg.defined = true
+  return cfg
+}
 
+var get_cfg = function (file) {
+  if(fs.existsSync(file)) return parse_cfg(fs.readFileSync(file, 'utf8'))
+}
+
+var def_cfg = get_cfg(path.join(process.env.HOME, '.tern-project'))
 
 utils.get.config = function (dir) {
   var file = path.join(dir, '.tern-project')
-  
   if(!fs.existsSync(file) && def_cfg) return def_cfg
-  
-  var config = tryor(function() {
-      return fs.readFileSync(file, 'utf8')
-  }, "{}")
 
-  var merged = merge(JSON.parse(config), present)
-  merged.libs = utils.unique(merged.libs)
-
-  if(Array.isArray(config.libs) && config.libs.indexOf('browser') < 0)
-    merged.libs.splice(merged.libs.indexOf('browser'), 1)
-
-  return merged
+  return merge(tryor(function() {
+    return get_cfg(file) || {}
+  }, {}), present)
 }
 
 utils.get.file = function (name, callback) {
@@ -94,18 +91,14 @@ utils.completions.order = function (callback) {
   }
 }
 
-utils.unique = function (ar) {
-  var values = {}
-
-  ar.forEach(function (el) {
-    values[el] = true
-  })
-
-  return Object.keys(values)
-}
-
 utils.defined = function () {
   return Array.prototype.every.call(arguments, function (el) {
     return (typeof el !== 'undefined') && (el !== null)
+  })
+}
+
+utils.values = function(object) {
+  return Object.keys(object).map(function (key) {
+    return object[key]
   })
 }

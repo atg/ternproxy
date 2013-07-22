@@ -118,6 +118,7 @@
 
     var obj = {"!type": out};
     if (this.doc) obj["!doc"] = this.doc;
+    if (this.html) obj["!html"] = this.html;
     addSpan(obj, getSpan(state, this, span));
     state.paths[this.path] = {structure: obj};
     setProps(this, obj, state);
@@ -186,6 +187,7 @@
     if (rec.mayCull == null && !proto && !hasProps(this)) rec.mayCull = true;
     if (proto) structure["!proto"] = proto;
     if (this.doc) structure["!doc"] = this.doc;
+    if (this.html) structure["!html"] = this.html;
     addSpan(this, getSpan(state, structure, span));
     setProps(this, structure, state);
     return this.path;
