@@ -1,6 +1,6 @@
 {
   "name": "ternproxy",
-  "version": "0.0.9pre",
+  "version": "0.0.9alpha",
   "main": "src/proxy/daemon.js",
   "license": "Unlicense",
   "dependencies": {
