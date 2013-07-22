@@ -1,13 +1,13 @@
 var interpolate = require('util').format,
     workspace = require('./workspace'),
-    utils = require('./utils'),
+    utils = require('../utils'),
     path = require('path')
-    
-    
-    
+
+
 var proxy = module.exports = {
   workspaces: {}
 }
+
 
 var get_workspace = function (project_dir, project_id, exists) {
   if(exists) {
@@ -19,6 +19,7 @@ var get_workspace = function (project_dir, project_id, exists) {
   proxy.workspaces[project_id] = workspace(project_dir, project_id, timeout)
   return proxy.workspaces[project_id]
 }
+
 
 proxy.workspace = function (info) {
   var project_dir = info.project_dir
@@ -46,10 +47,9 @@ proxy.workspace = function (info) {
     return get_workspace(project_dir, project_ids.shift(), true)
 }
 
+
 proxy.timeout = function (id) {
   return function () {
-    console.log('workspace timeout', id)
-    
     if(utils.defined(proxy.workspaces[id]) && utils.defined(proxy.workspaces[id].tern))
       proxy.workspaces[id].tern.reset()
     if(utils.defined(proxy.workspaces[id]))
@@ -57,21 +57,25 @@ proxy.timeout = function (id) {
   }
 }
 
+
 proxy.filename = function (info) {
   // If this is untitled, use ///null/<documentid>
   if(info.path === '///null') return interpolate('///null/%s', info.document_id)
   return info.path
 }
 
+
 proxy.untitled = function (path) {
   return path === '///null'
 }
+
 
 proxy.compact = function (workspace) {
   return Object.keys(workspace.cache).filter(function (id) {
     return !!workspace.cache[id]
   })
 }
+
 
 proxy.file = function (info, workspace) {
   var full = !!info.sending_full_content
@@ -92,6 +96,7 @@ proxy.file = function (info, workspace) {
 
   return [{type: 'full', name: name, text: text}]
 }
+
 
 proxy.delta = function (workspace, document_id, offset, length, content) {
   var oldContent = workspace.file(document_id)

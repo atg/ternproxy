@@ -1,8 +1,7 @@
 var interpolate = require('util').format,
     formidable = require('formidable'),
     domain = require('domain'),
-    utils = require('./utils'),
-    log = require('./log')
+    utils = require('./utils')
 
 module.exports = function () {
   var routes = {
@@ -38,7 +37,6 @@ module.exports = function () {
         
         req.body = fields
         
-        log.req(req)
         routes[method][req.url](req, res)
       })
     }

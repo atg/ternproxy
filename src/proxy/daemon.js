@@ -1,13 +1,11 @@
-var condense = require('./condense')(),
-    router = require('./router')(),
+var condense = require('../condense')(),
+    router = require('../router')(),
+    symbols = require('./symbols'),
+    utils = require('../utils'),
     proxy = require('./proxy'),
-    utils = require('./utils'),
     posix = require('posix'),
-    tags = require('./tags'),
-    log = require('./log'),
+    log = require('../log'),
     http = require('http')
-
-
 
 
 var server = http.createServer(router).listen(8542, function () {
@@ -270,7 +268,8 @@ router.post('/tags', function (req, res) {
 
   var callback = function (e, condense) {
     if(e) return utils.http.respond(req, res)(e)
-    utils.http.respond(req, res)(null, tags(condense, content), 200)
+    var tags = symbols(condense, content)
+    utils.http.respond(req, res)(null, tags, 200)
   }
 
   if(workspace) workspace.condense(file, content, dir, callback)

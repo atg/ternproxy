@@ -1,7 +1,7 @@
 var interpolate = require('util').format,
     present = require('./config.json'),
-    findpkg = require('findpkg'),
     merge = require('deepmerge'),
+    async = require('async'),
     tryor = require('tryor'),
     path = require('path'),
     log = require('./log'),
@@ -14,6 +14,7 @@ utils.find = noop
 utils.load = noop
 utils.get = noop
 utils.http = noop
+utils.JSON = noop
 utils.noop = noop
 
 var parse_cfg = function (str) {
@@ -51,11 +52,11 @@ utils.load.plugins = function (plugins) {
 }
 
 utils.find.module = function (name) {
-  return findpkg({filename: require.resolve(name)})
+  return path.join(__dirname, '../node_modules/', name)
 }
 
 utils.find.defs = function (dir, libs) {
-  var base = path.resolve(utils.find.module('tern').dirname, 'defs')
+  var base = path.resolve(utils.find.module('tern'), 'defs')
 
   return libs.map(function (lib) {
     if(!/\.json$/.test(lib)) lib = lib + '.json';
@@ -79,14 +80,17 @@ utils.http.respond = function (req, res) {
 
     res.statusCode = status
     res.end(isObj ? JSON.stringify(data) : data)
-    log.res(req, res, data)
   }
 }
 
 utils.completions.order = function (callback) {
   return function (e, data) {
     if(e) return callback(e, data)
-    data.completions = data.completions.sort(function (a, b) { return a.depth - b.depth })
+    
+    data.completions = data.completions.sort(function (a, b) {
+      return a.depth - b.depth
+    })
+    
     callback(e, data)
   }
 }
@@ -100,5 +104,29 @@ utils.defined = function () {
 utils.values = function(object) {
   return Object.keys(object).map(function (key) {
     return object[key]
+  })
+}
+
+utils.JSON.parse = function (data, callback) {
+  try {
+    var json = JSON.parse(data)
+    callback(null, json)
+  } catch (e) {
+    callback(e)
+  }
+}
+
+utils.JSON.read = function (file, callback) {
+  fs.exists(file, function (exists) {
+    if(!exists) return callback()
+    fs.readFile(file, 'utf8', function (e, data) {
+      if(e) return callback(e)
+      try {
+        var json = JSON.parse(data)
+        callback(null, json)
+      } catch (e) {
+        callback(e)
+      }
+    })
   })
 }

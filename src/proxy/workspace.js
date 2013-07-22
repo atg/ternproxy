@@ -1,7 +1,6 @@
-var condense = require('./condense'),
-    lizard = require('./lizard'),
-    utils = require('./utils'),
-    log = require('./log'),
+var lizard = require('../lizard/lizard'),
+    condense = require('../condense'),
+    utils = require('../utils'),
     path = require('path'),
     tern = require('tern'),
     fs = require('fs')
@@ -29,12 +28,10 @@ var workspace = module.exports = function (dir, id, callback, tolerance) {
   }.bind(this))
 }
 
-workspace.prototype.start = function (cfg, already_updated) {
-  if(!already_updated) {
-    this.defs = utils.find.defs(this.dir, cfg.libs)
-    utils.get.plugins(cfg.plugins)
-    this.config = cfg
-  }
+workspace.prototype.start = function (cfg) {
+  this.defs = utils.find.defs(this.dir, cfg.libs)
+  utils.get.plugins(cfg.plugins)
+  this.config = cfg
 
   if(utils.defined(this.tern)) this.tern.reset()
 
@@ -74,7 +71,6 @@ workspace.prototype.file = function (id, text, name) {
 workspace.prototype.clean = function (id) {
   var self = this
   return function () {
-    console.log('file timeout', self.cache_index[id])
     self.tern.delFile(self.cache_index[id])
     self.cache[id] = undefined
   }
