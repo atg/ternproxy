@@ -33,10 +33,6 @@ var bower = function (lizard) {
   })
 }
 
-bower.prototype.assert_concurrency = function (name) {
-  if(this.analyzed.indexOf(name) >= 0) return true
-}
-
 bower.prototype.read_conf = function (file, callback) {
   var that = this
 
@@ -48,7 +44,6 @@ bower.prototype.read_conf = function (file, callback) {
 }
 
 bower.prototype.add_known_lib = function (name) {
-  console.log(name)
   this.analyzed.push(name)
   this.lizard.workspace.config.libs.push(name)
   this.lizard.workspace.start(this.lizard.workspace.config)
@@ -56,10 +51,9 @@ bower.prototype.add_known_lib = function (name) {
 
 bower.prototype.read_dependencies_dir = function (dir) {
   var that = this
-}
-
-bower.prototype.read_dependency_conf = function (name) {
-  var that = this
+  fs.readdir(dir, function (e, files) {
+    files.forEach(that.read_dependency_conf, that)
+  })
 }
 
 bower.prototype.add_main = function (main, name) {
@@ -78,7 +72,7 @@ bower.prototype.add_main = function (main, name) {
 }
 
 bower.prototype.analize_dependency = function (source, name) {
-  if(this.assert_concurrency(name)) return
+  if(this.analyzed.indexOf(name) >= 0) return
   var that = this
   
   condense(name, source, null, function (e, condense) {
@@ -93,31 +87,36 @@ bower.prototype.analize_dependency = function (source, name) {
   })
 }
 
-bower.prototype.analize_conf = function (conf) {
+bower.prototype.read_dependency_conf = function (dependency) {
   var that = this
+
+  if(tern_libs.indexOf(dependency) >= 0) return that.add_known_lib(dependency)
+  if(that.analyzed.indexOf(dependency) >= 0) return
   
-  if(conf.dependencies) Object.keys(conf.dependencies).forEach(function (dependency) {
-    if(tern_libs.indexOf(dependency) >= 0) return that.add_known_lib(dependency)
-    if(that.assert_concurrency(dependency)) return
-    
-    var dependency_conf_file = path.join(that.dependencies_dir, dependency, 'bower.json')
-    fs.exists(dependency_conf_file, function (exists) {
-      if(!exists) return
-      if(that.assert_concurrency(dependency)) return
-      
-      that.read_conf(dependency_conf_file, function (e, conf) {
-        if(e) return log.onError(e)
-        if(that.assert_concurrency(dependency)) return
-        if(utils.defined(conf.main)) that.add_main(conf.main, dependency)
-      })
+  var dependency_conf_file = path.join(that.dependencies_dir, dependency, 'bower.json')
+  fs.exists(dependency_conf_file, function (exists) {
+    if(!exists) return
+    if(that.analyzed.indexOf(dependency) >= 0) return
+    that.read_conf(dependency_conf_file, function (e, conf) {
+      if(e) return log.onError(e)
+      if(that.analyzed.indexOf(dependency) >= 0) return
+      if(utils.defined(conf.main)) that.add_main(conf.main, dependency)
     })
   })
 }
 
-bower.prototype.analize_dependencies_dir = function (dirs) {
-  
+bower.prototype.analize_conf = function (conf) {
+  if(conf.dependencies) Object.keys(conf.dependencies).forEach(this.read_dependency_conf, this)
 }
 
+// TESTAR:
+// com bower.json e com bower_components (onde bower_components tem mais dependencias que bower)
+// sem bower.json e com bower_components
+// com bower.json e sem bower_components
+// todos com e sem defs já gravadas
+
+// TODO: limpar código
+// TODO: ignorar ~.js files
 
 
 var lizard = module.exports = function (workspace) {
@@ -138,84 +137,6 @@ lizard.prototype.check_dotfiles = function () {
   if(this.defined) return
 }
 
-/*
-
-var bower_components = []
-// read the libs
-
-
-
-
-
-var bower = JSON.parse(fs.readFileSync(path.join(workspace.dir, 'bower.json'), 'utf8'))
-//TODO: cuidado com ficheiros non-js (tipo coffescript)
-
-  //ver se as dependencias estão registadas
-    //se estiverem registadas, ver se estão instaladas
-      //se estiverem isntaladas, correr condense nos main files
-      //se não estiverem isntaladas, procurar no typescript
-      
-//se não estiverem registadas, correr a pasta
-var dependencies_dir = path.join(workspace.dir, 'bower_components')
-var dependencies = fs.readdirSync(dependencies_dir)
-
-dependencies.forEach(function (dependency) {
-  if((tern_libs.indexOf(dependency) >= 0) && (workspace.config.libs.indexOf(dependency) < 0)) {
-    workspace.config.libs.push(dependency)
-    return workspace.start(workspace.config)
-  }
-  
-  var declaration_file = path.join(dependencies_dir, dependency, 'bower.json')
-  //ver se o ficheiro existe
-  if(!fs.existsSync(declaration_file)) return
-  var declaration = JSON.parse(fs.readFileSync(declaration_file, 'utf8'))
-  //
-  if(!utils.defined(declaration) || !utils.defined(declaration.main)) return
-  var script_files = declaration.main.map(function (file) {
-    return path.resolve(dependencies_dir, dependency, file)
-  })
-  //se o ficheiro não existir, procurar declaração typescript
-  script_files.forEach(function (file) {
-    if(!fs.existsSync(file)) return
-    if(bower_components.indexOf(dependency) >= 0) return
-    condense(file, fs.readFileSync(file, 'utf8'), path.dirname(file), function (e, condense) {
-      if(e) console.log('CONDENSE ERROR', e)
-      fs.writeFileSync(path.join(__dirname, '../node_modules/tern/defs', dependency + '.json'), JSON.stringify(condense, null, 2), 'utf8')
-      workspace.config.libs.push(dependency)
-      workspace.start(workspace.config)
-      bower_components.push(dependency)
-      // condense['!name'] = dependency
-      // workspace.defs.push(condense)
-      // workspace.start(workspace.config, true)
-      // bower_components.push(dependency)
-      // console.log('added %s', file)
-    })
-  })
-})*/
-
-
-// {
-//   "name": "ember",
-//   "version": "1.0.0-rc.6",
-//   "main": [
-//     "./ember.js"
-//   ],
-//   "dependencies": {
-//     "jquery": "~1.9.1",
-//     "handlebars": "1.0.0-rc.4"
-//   },
-//   "gitHead": "884a040a6bfe02d125be6f55fb2030f8f6644d16",
-//   "readme": "Ember.js\n========\n\nShim repository for [Ember Application Framework](http://emberjs.com/).\n\nThis package provides the core of the ember.js framework.\n\nPackage Managers\n----------------\n\n* [Bower](http://bower.io): `ember`\n* [Composer](http://packagist.org/packages/components/ember): `components/ember`\n",
-//   "readmeFilename": "README.md",
-//   "_id": "ember@1.0.0-rc.6",
-//   "description": "Ember.js ========",
-//   "repository": {
-//     "type": "git",
-//     "url": "git://github.com/components/ember"
-//   }
-// }
-
-
 // monitor root file creations
 // monitor file changes for:
 //  * package.json
@@ -231,4 +152,3 @@ dependencies.forEach(function (dependency) {
 // jam
 // grunt
 // browserify
-
