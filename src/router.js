@@ -51,6 +51,8 @@ module.exports = function () {
       routes[method][route] = callback
     }
   })
+  
+  middleware.routes = routes
 
   return middleware
 }

@@ -93,6 +93,10 @@ router.post('/file/complete', function (req, res) {
       end: req.body.cursor_position
     }
   }, utils.completions.order(utils.http.respond(req, res)))
+  
+  if(utils.defined(req.body.heuristics)) setImmediate(function () {
+    router.routes.post['/heuristics'](req, workspace)
+  })
 })
 
 
@@ -274,6 +278,47 @@ router.post('/tags', function (req, res) {
 
   if(workspace) workspace.condense(file, content, dir, callback)
   else condense(file, content, dir, callback)
+})
+
+
+router.post('/heuristics', function (req, workspace) {
+  var modified = false
+  
+  var plugin = function (plugin) {
+    var is_defined = utils.defined(workspace.config.plugins[plugin])
+    
+    if(req.heuristics[plugin] < 0.5 && is_defined) {
+      workspace.config.plugins[plugin] = undefined
+      modified = true
+    }
+    
+    if(req.heuristics[plugin] >= 0.5 && !is_defined) {
+      workspace.config.plugins[plugin] = {}
+      modified = true
+    }
+  }
+  
+  var lib = function (lib) {
+    var pos = workspace.config.libs.indexOf(lib)
+    var is_defined = pos >= 0
+    
+    if(req.heuristics[plugin] < 0.5 && is_defined) {
+      workspace.config.libs.splice(pos, 1);
+      modified = true
+    }
+    
+    if(req.heuristics[plugin] >= 0.5 && !is_defined) {
+      workspace.config.libs.push(lib)
+      modified = true
+    }
+  }
+  
+  Object.keys(req.heuristics).forEach(function (heuristic) {
+    if(['node', 'requirejs'].indexOf(heuristic) >= 0) plugin(heuristic)
+    else lib(heuristic)
+  })
+  
+  if(modified) workspace.start(workspace.config)
 })
 
 
