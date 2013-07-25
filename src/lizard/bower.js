@@ -5,6 +5,12 @@ var condense = require('../condense')(null, true),
     path = require('path'),
     fs = require('fs')
 
+// have a special folder for generated defs
+//  /Users/ramitos/Library/Caches/com.chocolatapp.chocolat
+// the files shoub be saved in with the current version: ember@1.0.0.json
+// when deciding if there are already defs generated, the version should be taken into account
+//  semver.satisfies(version_we_have, version_needed)
+
 
 var def_file = path.join(__dirname, '../../node_modules/tern/defs', '%s.json')
 var defs_dir = path.join(__dirname, '../../node_modules/tern/defs')

@@ -8,9 +8,10 @@
     "formidable": "1.0.x",
     "deepmerge": "0.2.x",
     "optimist": "0.5.x",
+    "semver": "2.0.x",
     "tryor": "0.1.x",
     "posix": "1.0.x",
-    "async": "~0.2.9"
+    "async": "0.2.x"
   },
   "devDependencies": {
     "request": "2.21.x",
