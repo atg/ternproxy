@@ -45,14 +45,14 @@ var tagger = function (lines, condense, tags, parent, name) {
     tagger(lines, condense[key], tags, p, key)
   })
   
-  if(!span || !type) return 0
+  if(!span) return 0
   
   var r = range(span)
   
   return tags.push({
     name: name,
     qualified_name: p.join('::'),
-    type_code: type_code(type),
+    type_code: type_code(type || ''),
     parent_name: parent.join('::'),
     range_line: r.line,
     range_column: r.column,
