@@ -46,7 +46,7 @@
         state.addedToForeign.push(actual, path);
       curOrigin = origPos;
     }
-    if (actual.path && pathLen(actual.path) <= pathLen(path)) return;
+    if (path && actual.path && pathLen(actual.path) <= pathLen(path)) return;
     actual.setPath(path, state, curOrigin);
   }
 
@@ -145,7 +145,7 @@
   }
 
   function hasProps(obj) {
-    if (obj.doc || obj.originNode) return true;
+    if (obj.doc || obj.html || obj.originNode) return true;
     for (var _prop in obj.props) return true;
   }
 
@@ -188,7 +188,7 @@
     if (proto) structure["!proto"] = proto;
     if (this.doc) structure["!doc"] = this.doc;
     if (this.html) structure["!html"] = this.html;
-    addSpan(this, getSpan(state, structure, span));
+    addSpan(structure, getSpan(state, structure, span));
     setProps(this, structure, state);
     return this.path;
   };
@@ -205,7 +205,7 @@
       }
     }
 
-    for (var v in desc) if (!/^!(?:define|name|proto|doc|span|url)$/.test(v))
+    for (var v in desc) if (!/^!(?:define|name|proto|doc|html|span|url)$/.test(v))
       desc[v] = sanitize(desc[v], state, path == null ? null : path ? path + "." + v : v);
     return desc;
   }
