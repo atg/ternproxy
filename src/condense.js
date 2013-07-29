@@ -4,25 +4,24 @@ var condense = require('tern/lib/condense'),
 
 module.exports = function (proto, comments) {
   return function (file, content, dir, callback) {
-    var config = (function () {
-      if(!utils.defined(proto) || !(this instanceof proto))
-        return {getFile: utils.get.file, async: true, plugins: {doc_comment: !!comments}}
-  
-      var plugins = JSON.parse(JSON.stringify(this.config.plugins))
-      plugins.node = undefined
-      plugins = JSON.parse(JSON.stringify(plugins))
-  
-      return {
-        getFile: utils.get.file,
-        async: true,
-        defs: this.defs,
-        plugins: this.config.plugins,
-        projectDir: this.dir
+    var config = {
+      getFile: utils.get.file,
+      async: true,
+      plugins: {
+        doc_comment: !!comments
       }
+    }
+    
+    var server = (function (that) {
+      if(!utils.defined(proto)) return new tern.Server(config)
+      if(!(that instanceof proto)) return new tern.Server(config)
+      if(!utils.defined(that.config.plugins.node)) return that.tern
+
+      config = JSON.parse(JSON.stringify(that.config))
+      config.plugins.node = undefined
+      return new tern.Server(config)
     })(this)
-  
-    var server = new tern.Server(config)
-  
+
     server.request({files: [{
       name: file,
       text: content,
