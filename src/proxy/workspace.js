@@ -77,3 +77,46 @@ workspace.prototype.clean = function (id) {
 }
 
 workspace.prototype.condense = condense(workspace)
+
+workspace.prototype.heuristics = function (heuristics) {
+  if(this.config.defined) return
+  
+  var was_modified = false
+  var that = this
+  
+  var plugin = function (plugin) {
+    var is_defined = utils.defined(that.config.plugins[plugin])
+    
+    if(heuristics[plugin] < 0.5 && is_defined) {
+      that.config.plugins[plugin] = undefined
+      was_modified = true
+    }
+    
+    if(heuristics[plugin] >= 0.5 && !is_defined) {
+      that.config.plugins[plugin] = {}
+      was_modified = true
+    }
+  }
+  
+  var lib = function (lib) {
+    var pos = that.config.libs.indexOf(lib)
+    var is_defined = pos >= 0
+    
+    if(heuristics[plugin] < 0.5 && is_defined) {
+      that.config.libs.splice(pos, 1);
+      was_modified = true
+    }
+    
+    if(heuristics[plugin] >= 0.5 && !is_defined) {
+      that.config.libs.push(lib)
+      was_modified = true
+    }
+  }
+  
+  Object.keys(heuristics).forEach(function (heuristic) {
+    if(['node', 'requirejs'].indexOf(heuristic) >= 0) plugin(heuristic)
+    else lib(heuristic)
+  })
+  
+  if(was_modified) that.start(that.config)
+}
