@@ -43,7 +43,7 @@ utils.get.file = function (name, callback) {
 }
 
 utils.load.plugins = function (plugins) {
-  var base = path.resolve(utils.find.module('tern').dirname, 'plugin')
+  var base = path.resolve(utils.find.module('tern'), 'plugin')
 
   Object.keys(plugins).forEach(function (plugin) {
     var file = path.join(base, interpolate('%s.js', plugin))
