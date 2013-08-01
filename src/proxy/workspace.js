@@ -102,12 +102,12 @@ workspace.prototype.heuristics = function (heuristics) {
     var pos = that.config.libs.indexOf(lib)
     var is_defined = pos >= 0
     
-    if(heuristics[plugin] < 0.5 && is_defined) {
+    if(heuristics[lib] < 0.5 && is_defined) {
       that.config.libs.splice(pos, 1);
       was_modified = true
     }
     
-    if(heuristics[plugin] >= 0.5 && !is_defined) {
+    if(heuristics[lib] >= 0.5 && !is_defined) {
       that.config.libs.push(lib)
       was_modified = true
     }

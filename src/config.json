@@ -1,6 +1,5 @@
 {
-  "libs": ["browser", "ecma5"],
-  "loadEagerly": false,
+  "libs": ["ecma5"],
   "plugins": {
     "doc_comment": true
   }
