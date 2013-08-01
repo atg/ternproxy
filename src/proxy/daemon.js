@@ -12,11 +12,11 @@ var server = http.createServer(router).listen(8542, function () {
   log('HTTP server running')
 })
 
-//every 30s check if the parent is still running
+//every 3s check if the parent is still running
 setInterval(function () {
   if(server.connections) return
   if(posix.getppid() < 2) process.exit()
-}, 30000)
+}, 3000)
 
 
 router.post('/file/opened', function (req, res) {
