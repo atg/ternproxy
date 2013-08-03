@@ -267,7 +267,6 @@ router.post('/rename', function (req, res) {
 router.post('/tags', function (req, res) {
   var workspace = proxy.workspace(req.body)
   var content = proxy.file(req.body, workspace).pop().text
-  var dir = req.body.project_dir
   var file = req.body.path
 
   var callback = function (e, condense) {
@@ -276,8 +275,8 @@ router.post('/tags', function (req, res) {
     utils.http.respond(req, res)(null, tags, 200)
   }
 
-  if(workspace) workspace.condense(file, content, dir, callback)
-  else condense(file, content, dir, callback)
+  if(workspace) workspace.condense(file, content, callback)
+  else condense(file, content, req.body.project_dir, callback)
 })
 
 

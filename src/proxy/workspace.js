@@ -20,7 +20,7 @@ var workspace = module.exports = function (dir, id, callback, tolerance) {
   this.start(utils.get.config(this.dir))
   
   if(!this.config.defined) process.nextTick(function () {
-    this.lizard = lizard(this)
+    //this.lizard = lizard(this)
   }.bind(this))
 
   if(this.config.loadEagerly) config.loadEagerly.forEach(function (file) {
@@ -76,7 +76,9 @@ workspace.prototype.clean = function (id) {
   }
 }
 
-workspace.prototype.condense = condense(workspace)
+workspace.prototype.condense = function (file, content, callback) {
+  condense(workspace).call(this, file, content, this.dir, callback)
+}
 
 workspace.prototype.heuristics = function (heuristics) {
   if(this.config.defined) return
