@@ -19,7 +19,7 @@ module.exports = function (proto, comments) {
 
       config = JSON.parse(JSON.stringify(that.config))
       config.plugins.node = undefined
-      return new tern.Server(config)
+      return new tern.Server(JSON.parse(JSON.stringify(config)))
     })(this)
 
     server.request({files: [{
