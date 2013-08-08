@@ -4,7 +4,7 @@
   "main": "src/proxy/daemon.js",
   "license": "Unlicense",
   "dependencies": {
-    "tern": "git://github.com/ramitos/tern.git",
+    "tern": "git://github.com/fileability/tern.git",
     "formidable": "1.0.x",
     "deepmerge": "0.2.x",
     "optimist": "0.5.x",
