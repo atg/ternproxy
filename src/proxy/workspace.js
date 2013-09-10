@@ -19,7 +19,7 @@ var workspace = module.exports = function (dir, id, callback, tolerance) {
   
   this.start(utils.get.config(this.dir))
   
-  if(!this.config.defined) process.nextTick(function () {
+  process.nextTick(function () {
     //this.lizard = lizard(this)
   }.bind(this))
 
@@ -29,7 +29,7 @@ var workspace = module.exports = function (dir, id, callback, tolerance) {
 }
 
 workspace.prototype.start = function (cfg) {
-  this.defs = utils.find.defs(this.dir, cfg.libs)
+  this.defs = utils.find.defs(cfg.libs)
   utils.get.plugins(cfg.plugins)
   this.config = cfg
 

@@ -10,6 +10,10 @@ var lizard = module.exports = function (workspace) {
   //fs.watch(workspace.dir, this.check_dotfiles.bind(this))
 }
 
+lizard.prototype.is_bower = function () {
+  
+}
+
 lizard.prototype.analize_file = function (file) {
   if(this.defined) return
   //file.name, lineOffsets, ast, text, scope

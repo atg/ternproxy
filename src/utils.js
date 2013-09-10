@@ -55,15 +55,15 @@ utils.find.module = function (name) {
   return path.join(__dirname, '../node_modules/', name)
 }
 
-utils.find.defs = function (dir, libs) {
+utils.find.defs = function (libs) {
   var base = path.resolve(utils.find.module('tern'), 'defs')
 
   return libs.map(function (lib) {
     if(!/\.json$/.test(lib)) lib = lib + '.json';
-    var file = path.join(base, lib)
-    if(fs.existsSync(file)) return require(file)
+    if(!/^\//.test(lib)) lib = path.join(base, lib)
+    if(fs.existsSync(lib)) return require(lib)
   }).filter(function (lib) {
-    return !!lib
+    return utils.defined(lib)
   })
 }
 

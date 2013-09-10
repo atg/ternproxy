@@ -32,10 +32,14 @@ project.xcworkspace
 /node_modules/semver/semver.min.js.gz
 /node_modules/tern/node_modules/marked/man/**
 /node_modules/tern/node_modules/marked/Makefile
-
+/node_modules/chai
+/node_modules/mocha
+/node_modules/request
 
 /node_modules/tern/node_modules/glob/node_modules/inherits/test.js
 /node_modules/tern/node_modules/minimatch/node_modules/sigmund/bench.js
 /node_modules/tern/node_modules/minimatch/node_modules/lru-cache/s.js
 /node_modules/tern/node_modules/glob/node_modules/inherits/inherits_browser.js
 /node_modules/tern/.npmignore
+/node_modules/tern/.no-sublime-package
+/node_modules/tern/node_modules/minimatch/node_modules/lru-cache/bench.js
