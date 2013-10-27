@@ -8,7 +8,7 @@ var condense = require('../condense')(),
     http = require('http')
 
 
-var server = http.createServer(router).listen(8542, function () {
+var server = http.createServer(router).listen(8542, "127.0.0.1", function () {
   log('HTTP server running')
 })
 
