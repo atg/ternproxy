@@ -1,26 +1,11 @@
-module.exports = function (condense, content) {
-  var types = {}
-  var tags = []
-  
-  Object.keys(condense).forEach(function (name) {
-    tagger(content.split('\n'), condense[name], tags, [], name)
-  })
-  
-  return {
-    tags: tags.sort(function (tag1, tag2) {
-      return tag1.range_line - tag2.range_line
-    })
-  }
-}
-
 var range = function (span) {
   span = span.match(/^(\d*?)\[(\d*?)\:(\d*?)\]-(\d*?)\[\d*?\:\d*?\]$/)
-  
+
   var lend = Number(span.pop())
   var column = Number(span.pop())
   var line = Number(span.pop())
   var lstart = Number(span.pop())
-  
+
   return {
     line: line,
     column: column,
@@ -39,16 +24,16 @@ var tagger = function (lines, condense, tags, parent, name) {
   var span = condense['!span']
   var p = parent.slice()
   p.push(name)
-  
+
   Object.keys(condense).forEach(function (key) {
     if(key.match(/^\!/)) return 0
     tagger(lines, condense[key], tags, p, key)
   })
-  
+
   if(!span) return 0
-  
+
   var r = range(span)
-  
+
   return tags.push({
     name: name,
     qualified_name: p.join('::'),
@@ -59,4 +44,19 @@ var tagger = function (lines, condense, tags, parent, name) {
     range_length: r.length,
     line_content: lines[r.line]
   })
+}
+
+module.exports = function (condense, content) {
+  var types = {}
+  var tags = []
+
+  Object.keys(condense).forEach(function (name) {
+    tagger(content.split('\n'), condense[name], tags, [], name)
+  })
+
+  return {
+    tags: tags.sort(function (tag1, tag2) {
+      return tag1.range_line - tag2.range_line
+    })
+  }
 }

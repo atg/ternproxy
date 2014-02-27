@@ -1,6 +1,5 @@
 var bower = require('./bower')
 
-
 var lizard = module.exports = function (workspace) {
   if(!(this instanceof lizard)) return new lizard(workspace)
   this.workspace = workspace
@@ -11,7 +10,7 @@ var lizard = module.exports = function (workspace) {
 }
 
 lizard.prototype.is_bower = function () {
-  
+
 }
 
 lizard.prototype.analize_file = function (file) {

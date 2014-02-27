@@ -37,7 +37,7 @@ router.post('/file/closed', function (req, res) {
     workspace.clean(req.body.document_id)()
     if(!proxy.compact(workspace)) proxy.timeout(workspace.id)()
   })
-  
+
   utils.http.respond(req, res)(null, 'Document closed')
 })
 
@@ -93,7 +93,7 @@ router.post('/file/complete', function (req, res) {
       end: req.body.cursor_position
     }
   }, utils.completions.order(utils.http.respond(req, res)))
-  
+
   if(utils.defined(req.body.heuristics)) setImmediate(function () {
     workspace.heuristics(req.body.heuristics)
   })
@@ -126,7 +126,7 @@ router.post('/file/complete', function (req, res) {
 router.post('/definition', function (req, res) {
   var workspace = proxy.workspace(req.body)
   if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
-  
+
   workspace.tern.request({
     files: proxy.file(req.body, workspace),
     query: {
