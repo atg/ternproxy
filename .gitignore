@@ -1,7 +1,6 @@
 .DS_Store
 xcuserdata
 project.xcworkspace
-
 /node_modules/**/test
 /node_modules/**/example
 /node_modules/**/examples
@@ -35,7 +34,6 @@ project.xcworkspace
 /node_modules/chai
 /node_modules/mocha
 /node_modules/request
-
 /node_modules/tern/node_modules/glob/node_modules/inherits/test.js
 /node_modules/tern/node_modules/minimatch/node_modules/sigmund/bench.js
 /node_modules/tern/node_modules/minimatch/node_modules/lru-cache/s.js
@@ -43,3 +41,5 @@ project.xcworkspace
 /node_modules/tern/.npmignore
 /node_modules/tern/.no-sublime-package
 /node_modules/tern/node_modules/minimatch/node_modules/lru-cache/bench.js
+node_modules/waterfall
+node_modules/glob

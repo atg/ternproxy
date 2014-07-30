@@ -15,9 +15,11 @@
     "tryor": "^0.1.2"
   },
   "devDependencies": {
-    "request": "^2.36.0",
+    "chai": "^1.9.1",
+    "glob": "^4.0.5",
     "mocha": "^1.20.1",
-    "chai": "^1.9.1"
+    "request": "^2.36.0",
+    "waterfall": "^1.0.0"
   },
   "scripts": {
     "test": "node_modules/.bin/mocha test/specs -u exports -R spec"
