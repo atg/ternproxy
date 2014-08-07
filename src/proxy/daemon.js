@@ -92,7 +92,7 @@ router.post('/file/complete', function (req, res) {
       urls: true,
       end: req.body.cursor_position
     }
-  }, utils.completions.order(utils.http.respond(req, res)))
+  }, utils.completions.order(utils.completions.transform(utils.http.respond(req, res))))
 
   if(utils.defined(req.body.heuristics)) setImmediate(function () {
     workspace.heuristics(req.body.heuristics)

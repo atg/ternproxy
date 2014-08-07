@@ -1,5 +1,6 @@
 var interpolate = require('util').format,
     present = require('./config.json'),
+    expand = require('./expand'),
     merge = require('deepmerge'),
     async = require('async'),
     tryor = require('tryor'),
@@ -71,7 +72,7 @@ utils.http.respond = function (req, res) {
   return function (e, data, status) {
     if(e) log.onError(e)
     if(res.finished) return
-    
+
     if(!e && typeof status !== 'number') status = 200
     if(e && typeof status !== 'number') status = 500
 
@@ -86,12 +87,31 @@ utils.http.respond = function (req, res) {
 utils.completions.order = function (callback) {
   return function (e, data) {
     if(e) return callback(e, data)
-    
+
     data.completions = data.completions.sort(function (a, b) {
       return a.depth - b.depth
     })
-    
+
     callback(e, data)
+  }
+}
+
+utils.completions.transform = function (callback) {
+  return function (e, data) {
+    if(e) return callback(e, data)
+
+    data.completions = data.completions.map(function (completion) {
+      try {
+        completion.snippet = expand(completion.type)
+      } catch(e){
+        log.onError(e)
+      }
+
+      console.log(completion);
+      return completion
+    })
+
+    callback(null, data);
   }
 }
 
