@@ -11,7 +11,7 @@ module.exports = function (proto, comments) {
         doc_comment: !!comments
       }
     }
-    
+
     var server = (function (that) {
       if(!utils.defined(proto)) return new tern.Server(config)
       if(!(that instanceof proto)) return new tern.Server(config)
@@ -27,7 +27,7 @@ module.exports = function (proto, comments) {
       text: content,
       type: 'full'
     }]}, utils.noop)
-  
+
     server.flush(function (e) {
       if(e) return callback(e)
       callback(null, condense.condense(file, file, {spans: true}))
