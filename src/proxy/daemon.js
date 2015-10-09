@@ -1,48 +1,55 @@
-var condense = require('../condense')(),
-    router = require('../router')(),
-    symbols = require('./symbols'),
-    utils = require('../utils'),
-    proxy = require('./proxy'),
-    posix = require('posix'),
-    log = require('../log'),
-    http = require('http')
+var http = require('http')
+var posix = require('posix')
 
 
-var server = http.createServer(router).listen(8542, "127.0.0.1", function () {
+var symbols = require('./symbols')
+var utils = require('../utils')
+var proxy = require('./proxy')
+var condense = require('../condense')()
+var router = require('../router')()
+var log = require('../log')
+
+
+var server = http.createServer(router).listen(8542, '127.0.0.1', function() {
   log('HTTP server running')
 })
 
-//every 3s check if the parent is still running
-setInterval(function () {
-  if(server.connections) return
-  if(posix.getppid() < 2) process.exit()
+// every 3s check if the parent is still running
+setInterval(function() {
+  if (server.connections) {
+    return
+  }
+
+  if (posix.getppid() < 2) {
+    process.exit()
+  }
 }, 3000)
 
-
-router.post('/file/opened', function (req, res) {
+router.post('/file/opened', function(req, res) {
   var workspace = proxy.workspace(req.body)
 
   workspace.file(req.body.document_id, req.body.FILE, proxy.filename(req.body))
   utils.http.respond(req, res)(null, 'Document opened')
 })
 
-
-router.post('/file/closed', function (req, res) {
-  Object.keys(proxy.workspaces).map(function (project_id) {
+router.post('/file/closed', function(req, res) {
+  Object.keys(proxy.workspaces).map(function(project_id) {
     return proxy.workspaces[project_id]
-  }).filter(function (workspace) {
+  }).filter(function(workspace) {
     return workspace && !!workspace.cache[req.body.document_id]
-  }).forEach(function (workspace) {
+  }).forEach(function(workspace) {
     clearTimeout(workspace.cache[req.body.document_id].timeout)
     workspace.clean(req.body.document_id)()
-    if(!proxy.compact(workspace)) proxy.timeout(workspace.id)()
+
+    if (!proxy.compact(workspace)) {
+      proxy.timeout(workspace.id)()
+    }
   })
 
   utils.http.respond(req, res)(null, 'Document closed')
 })
 
-
-/*
+/**
  * Asks the server for a set of completions at the given point.
  *
  * @param {string} file Relative path of the file
@@ -77,9 +84,12 @@ router.post('/file/closed', function (req, res) {
  *     {string} url
  *     {} origin
  */
-router.post('/file/complete', function (req, res) {
+router.post('/file/complete', function(req, res) {
   var workspace = proxy.workspace(req.body)
-  if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
+
+  if (!workspace) {
+    return utils.http.respond(req, res)(null, undefined, 304)
+  }
 
   workspace.tern.request({
     files: proxy.file(req.body, workspace),
@@ -94,18 +104,17 @@ router.post('/file/complete', function (req, res) {
     }
   }, utils.completions.order(utils.completions.transform(utils.http.respond(req, res))))
 
-  if(utils.defined(req.body.heuristics)) setImmediate(function () {
+  if (utils.defined(req.body.heuristics)) setImmediate(function() {
     workspace.heuristics(req.body.heuristics)
   })
 })
 
-
-/*
+/**
  * Asks for the definition of something. This will try, for a variable or property,
  * to return the point at which it was defined. If that fails, or the chosen
  * expression is not an identifier or property reference, it will try to return
  * the definition site of the type the expression has. If no type is found, or the
- * type is not an object or function (other types don’t store their definition site),
+ * type is not an object or function(other types don’t store their definition site),
  * it will fail to return useful information
  *
  * @param {number} [start]
@@ -123,9 +132,12 @@ router.post('/file/complete', function (req, res) {
  *   {string} urls
  *   {string} origin
  */
-router.post('/definition', function (req, res) {
+router.post('/definition', function(req, res) {
   var workspace = proxy.workspace(req.body)
-  if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
+
+  if (!workspace) {
+    return utils.http.respond(req, res)(null, undefined, 304)
+  }
 
   workspace.tern.request({
     files: proxy.file(req.body, workspace),
@@ -137,8 +149,7 @@ router.post('/definition', function (req, res) {
   }, utils.http.respond(req, res))
 })
 
-
-/*
+/**
  * Query the type of something.
  *
  * @param {number} [start]
@@ -162,9 +173,12 @@ router.post('/definition', function (req, res) {
  *   {string} urls
  *   {string} origin
  */
-router.post('/type', function (req, res) {
+router.post('/type', function(req, res) {
   var workspace = proxy.workspace(req.body)
-  if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
+
+  if (!workspace) {
+    return utils.http.respond(req, res)(null, undefined, 304)
+  }
 
   workspace.tern.request({
     files: proxy.file(req.body, workspace),
@@ -176,8 +190,7 @@ router.post('/type', function (req, res) {
   }, utils.http.respond(req, res))
 })
 
-
-/*
+/**
  * Get the documentation string and URL for a given expression, if any
  *
  * @param {number} [start]
@@ -189,9 +202,12 @@ router.post('/type', function (req, res) {
  *   {string} urls
  *   {string} origin
  */
-router.post('/documentation', function (req, res) {
+router.post('/documentation', function(req, res) {
   var workspace = proxy.workspace(req.body)
-  if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
+
+  if (!workspace) {
+    return utils.http.respond(req, res)(null, undefined, 304)
+  }
 
   workspace.tern.request({
     files: proxy.file(req.body, workspace),
@@ -203,8 +219,7 @@ router.post('/documentation', function (req, res) {
   }, utils.http.respond(req, res))
 })
 
-
-/*
+/**
  * Used to find all references to a given variable or property
  *
  * @param {number} [start]
@@ -218,9 +233,12 @@ router.post('/documentation', function (req, res) {
  *     {number} start
  *     {number} end
  */
-router.post('/refs', function (req, res) {
+router.post('/refs', function(req, res) {
   var workspace = proxy.workspace(req.body)
-  if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
+
+  if (!workspace) {
+    return utils.http.respond(req, res)(null, undefined, 304)
+  }
 
   workspace.tern.request({
     files: proxy.file(req.body, workspace),
@@ -232,8 +250,7 @@ router.post('/refs', function (req, res) {
   }, utils.http.respond(req, res))
 })
 
-
-/*
+/**
  * Rename a variable in a scope-aware way
  *
  * @param {number} [start]
@@ -248,9 +265,12 @@ router.post('/refs', function (req, res) {
  *     {number} end
  *     {string} text
  */
-router.post('/rename', function (req, res) {
+router.post('/rename', function(req, res) {
   var workspace = proxy.workspace(req.body)
-  if(!workspace) return utils.http.respond(req, res)(null, undefined, 304)
+
+  if (!workspace) {
+    return utils.http.respond(req, res)(null, undefined, 304)
+  }
 
   workspace.tern.request({
     files: proxy.file(req.body, workspace),
@@ -263,24 +283,28 @@ router.post('/rename', function (req, res) {
   }, utils.http.respond(req, res))
 })
 
-
-router.post('/tags', function (req, res) {
+router.post('/tags', function(req, res) {
   var workspace = proxy.workspace(req.body)
   var content = proxy.file(req.body, workspace).pop().text
   var file = req.body.path
 
-  var callback = function (e, condense) {
-    if(e) return utils.http.respond(req, res)(e)
+  var callback = function(e, condense) {
+    if (e) {
+      return utils.http.respond(req, res)(e)
+    }
+
     var tags = symbols(condense, content)
     utils.http.respond(req, res)(null, tags, 200)
   }
 
-  if(workspace) workspace.condense(file, content, callback)
-  else condense(file, content, req.body.project_dir, callback)
+  if (workspace) {
+    workspace.condense(file, content, callback)
+  } else {
+    condense(file, content, req.body.project_dir, callback)
+  }
 })
 
-
-router.get('/ping', function (req, res) {
+router.get('/ping', function(req, res) {
   utils.http.respond(req, res)(null, {
     memory: process.memoryUsage(),
     uptime: process.uptime(),

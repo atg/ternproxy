@@ -1,11 +1,11 @@
 var interpolate = require('util').format,
     verbose = require('optimist').argv.v
 
-module.exports = function (message) {
-  console.log('Chocolat ⇄ Tern: ', message);
+module.exports = function(message) {
+  console.log('Chocolat ⇄ Tern: ', message)
 }
 
-module.exports.onError = function (e, res) {
+module.exports.onError = function(e, res) {
   module.exports(interpolate('%s\nArguments: %s\nType: %s\nStack: %s\n', e.message, e.arguments, e.type, e.stack))
 }
 

@@ -1,4 +1,4 @@
-var range = function (span) {
+var range = function(span) {
   span = span.match(/^(\d*?)\[(\d*?)\:(\d*?)\]-(\d*?)\[\d*?\:\d*?\]$/)
 
   var lend = Number(span.pop())
@@ -13,24 +13,24 @@ var range = function (span) {
   }
 }
 
-var type_code = function (type) {
-  if(type.match(/^fn/)) return 'function'
+var type_code = function(type) {
+  if (type.match(/^fn/)) return 'function'
   else return 'variable'
 }
 
-var tagger = function (lines, condense, tags, parent, name) {
-  if(typeof condense !== 'object' || name.match(/^\!/)) return 0
+var tagger = function(lines, condense, tags, parent, name) {
+  if (typeof condense !== 'object' || name.match(/^\!/)) return 0
   var type = condense['!type']
   var span = condense['!span']
   var p = parent.slice()
   p.push(name)
 
-  Object.keys(condense).forEach(function (key) {
-    if(key.match(/^\!/)) return 0
+  Object.keys(condense).forEach(function(key) {
+    if (key.match(/^\!/)) return 0
     tagger(lines, condense[key], tags, p, key)
   })
 
-  if(!span) return 0
+  if (!span) return 0
 
   var r = range(span)
 
@@ -46,16 +46,16 @@ var tagger = function (lines, condense, tags, parent, name) {
   })
 }
 
-module.exports = function (condense, content) {
+module.exports = function(condense, content) {
   var types = {}
   var tags = []
 
-  Object.keys(condense).forEach(function (name) {
+  Object.keys(condense).forEach(function(name) {
     tagger(content.split('\n'), condense[name], tags, [], name)
   })
 
   return {
-    tags: tags.sort(function (tag1, tag2) {
+    tags: tags.sort(function(tag1, tag2) {
       return tag1.range_line - tag2.range_line
     })
   }

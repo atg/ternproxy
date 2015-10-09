@@ -1,1 +1,1 @@
-module.exports.t = function () {}
+module.exports.t = function() {}
