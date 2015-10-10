@@ -100,6 +100,12 @@ router.post('/file/complete', function(req, res) {
       depths: true,
       docs: true,
       urls: true,
+      sort: false,
+      includeKeywords: true,
+      omitObjectPrototype: false,
+      guess: true,
+      filter: true,
+      origins: true,
       end: req.body.cursor_position
     }
   }, utils.completions.order(utils.completions.transform(utils.http.respond(req, res))))
