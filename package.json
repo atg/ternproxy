@@ -7,9 +7,11 @@
     "async": "^1.4.2",
     "deepmerge": "^0.2.10",
     "formidable": "^1.0.17",
+    "highlight.js": "^8.8.0",
     "mkdirp": "^0.5.1",
     "optimist": "^0.6.1",
     "posix": "^4.0.0",
+    "remarkable": "^1.6.0",
     "semver": "^5.0.3",
     "tern": "fileability/tern#97c95226401a8365cedea581ba9183e20a65e8e7",
     "tryor": "^0.1.2"

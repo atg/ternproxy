@@ -8,6 +8,7 @@ var fs = require('fs')
 var log = require('./log')
 var present = require('./config.json')
 var expand = require('./expand')
+var doc = require('./doc')
 
 var utils = module.exports
 utils.completions = noop
@@ -136,6 +137,7 @@ utils.completions.transform = function(callback) {
     data.completions = data.completions.map(function(completion) {
       try {
         completion.snippet = expand(completion.type)
+        completion.html = doc(completion.doc)
       } catch (err) {
         log.onError(err)
       }
