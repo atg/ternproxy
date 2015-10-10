@@ -1,7 +1,9 @@
-var interpolate = require('util').format,
-    formidable = require('formidable'),
-    domain = require('domain'),
-    utils = require('./utils')
+var interpolate = require('util').format
+var formidable = require('formidable')
+var domain = require('domain')
+
+var utils = require('./utils')
+
 
 module.exports = function() {
   var routes = {

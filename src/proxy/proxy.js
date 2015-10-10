@@ -8,7 +8,6 @@ var proxy = module.exports = {
   workspaces: {}
 }
 
-
 var get_workspace = function(project_dir, project_id, exists) {
   if (exists) {
     proxy.workspaces[project_id].extend()
@@ -26,27 +25,33 @@ proxy.workspace = function(info) {
   var project_id = info.project_id
   var file = info.path
 
-  if (utils.defined(project_id, proxy.workspaces[project_id]))
+  if (utils.defined(project_id, proxy.workspaces[project_id])) {
     return get_workspace(project_dir, project_id, true)
+  }
 
 
-  if (utils.defined(project_id, project_dir))
+  if (utils.defined(project_id, project_dir)) {
     return get_workspace(project_dir, project_id)
+  }
 
-  if (utils.defined(project_id, file))
+  if (utils.defined(project_id, file)) {
     return get_workspace(path.dirname(info.path), project_id)
+  }
 
   var project_ids = Object.keys(proxy.workspaces).filter(function(project_id) {
     var workspace = proxy.workspaces[project_id]
 
-    if (!utils.defined(workspace)) return
+    if (!utils.defined(workspace)) {
+      return
+    }
+
     return workspace.dir === project_dir
   })
 
-  if (project_ids.length)
+  if (project_ids.length) {
     return get_workspace(project_dir, project_ids.shift(), true)
+  }
 }
-
 
 proxy.timeout = function(id) {
   return function() {
@@ -57,25 +62,21 @@ proxy.timeout = function(id) {
   }
 }
 
-
 proxy.filename = function(info) {
   // If this is untitled, use ///null/<documentid>
   if (info.path === '///null') return interpolate('///null/%s', info.document_id)
   return info.path
 }
 
-
 proxy.untitled = function(path) {
   return path === '///null'
 }
-
 
 proxy.compact = function(workspace) {
   return Object.keys(workspace.cache).filter(function(id) {
     return !!workspace.cache[id]
   })
 }
-
 
 proxy.file = function(info, workspace) {
   var full = !!info.sending_full_content
@@ -85,22 +86,27 @@ proxy.file = function(info, workspace) {
   var name = proxy.filename(info)
   var text = info.FILE || ''
 
-  if (!full && utils.defined(workspace))
+  if (!full && utils.defined(workspace)) {
     text = proxy.delta(workspace, document_id, offset, length, text)
+  }
 
-  if (text.length < info.cursor_position)
+  if (text.length < info.cursor_position) {
     info.cursor_position = text.length
+  }
 
-  if (full && utils.defined(workspace))
+  if (full && utils.defined(workspace)) {
     workspace.file(document_id, text, name)
+  }
 
   return [{type: 'full', name: name, text: text}]
 }
 
-
 proxy.delta = function(workspace, document_id, offset, length, content) {
   var oldContent = workspace.file(document_id)
-  if (!oldContent) return ''
+
+  if (!oldContent) {
+    return ''
+  }
 
   var prefix = oldContent.substr(0, offset)
   var suffix = oldContent.substr(offset + length, oldContent.length - offset - length)

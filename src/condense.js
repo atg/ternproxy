@@ -3,8 +3,8 @@ var tern = require('tern')
 
 var utils = require('./utils')
 
-module.exports = function (proto, comments) {
-  return function (file, content, dir, callback) {
+module.exports = function(proto, comments) {
+  return function(file, content, dir, callback) {
     var config = {
       getFile: utils.get.file,
       async: true,
@@ -13,7 +13,7 @@ module.exports = function (proto, comments) {
       }
     }
 
-    var server = (function (that) {
+    var server = (function(that) {
       if (!utils.defined(proto)) {
         return new tern.Server(config)
       }
@@ -39,7 +39,7 @@ module.exports = function (proto, comments) {
       }]
     }, utils.noop)
 
-    server.flush(function (err) {
+    server.flush(function(err) {
       if (err) {
         return callback(err)
       }

@@ -1,34 +1,37 @@
-var condense = require('../condense'),
-    utils = require('../utils'),
-    path = require('path'),
-    tern = require('../../../tern'),
-    fs = require('fs')
+var utils = require('../utils')
+var path = require('path')
 
+var condense = require('../condense')
+var tern = require('../../../tern')
 
-var workspace = module.exports = function(dir, id, callback, tolerance) {
-  if (!(this instanceof workspace)) return new workspace(dir, id, callback, tolerance)
+var Workspace = module.exports = function(dir, id, callback, tolerance) {
+  if (!(this instanceof Workspace)) {
+    return new Workspace(dir, id, callback, tolerance)
+  }
 
   this.id = id
   this.cache = {}
   this.cache_index = {}
   this.dir = path.resolve(dir)
-  this.tolerance = tolerance | 60000 //5m
+  this.tolerance = tolerance | 60000 // 5m
   this.callback = callback
   this.extend()
 
   this.start(utils.get.config(this.dir))
 
-  if (this.config.loadEagerly) config.loadEagerly.forEach(function(file) {
+  if (this.config.loadEagerly) this.config.loadEagerly.forEach(function(file) {
     this.tern.addFile(file)
   }.bind(this))
 }
 
-workspace.prototype.start = function(cfg) {
+Workspace.prototype.start = function(cfg) {
   this.defs = utils.find.defs(cfg.libs)
   utils.get.plugins(cfg.plugins)
   this.config = cfg
 
-  if (utils.defined(this.tern)) this.tern.reset()
+  if (utils.defined(this.tern)) {
+    this.tern.reset()
+  }
 
   this.tern = new tern.Server({
     getFile: utils.get.file,
@@ -40,23 +43,35 @@ workspace.prototype.start = function(cfg) {
   })
 }
 
-workspace.prototype.extend = function() {
-  if (this.timeout) clearTimeout(this.timeout)
+Workspace.prototype.extend = function() {
+  if (this.timeout) {
+    clearTimeout(this.timeout)
+  }
+
   this.timeout = setTimeout(this.callback, this.tolerance)
 }
 
-workspace.prototype.file = function(id, text, name) {
-  if (!id) return
-  if (utils.defined(name)) this.cache_index[id] = name
+Workspace.prototype.file = function(id, text, name) {
+  if (!id) {
+    return
+  }
 
-  if (this.cache[id]) clearTimeout(this.cache[id].timeout)
+  if (utils.defined(name)) {
+    this.cache_index[id] = name
+  }
+
+  if (this.cache[id]) {
+    clearTimeout(this.cache[id].timeout)
+  }
 
   if (arguments.length < 2 && !this.cache[id]) {
     this.file(id, '')
     return this.file(id)
   }
 
-  if (arguments.length < 2) return this.cache[id].text
+  if (arguments.length < 2) {
+    return this.cache[id].text
+  }
 
   this.cache[id] = {
     text: text,
@@ -64,7 +79,7 @@ workspace.prototype.file = function(id, text, name) {
   }
 }
 
-workspace.prototype.clean = function(id) {
+Workspace.prototype.clean = function(id) {
   var self = this
   return function() {
     self.tern.delFile(self.cache_index[id])
@@ -72,12 +87,14 @@ workspace.prototype.clean = function(id) {
   }
 }
 
-workspace.prototype.condense = function(file, content, callback) {
-  condense(workspace).call(this, file, content, this.dir, callback)
+Workspace.prototype.condense = function(file, content, callback) {
+  condense(Workspace).call(this, file, content, this.dir, callback)
 }
 
-workspace.prototype.heuristics = function(heuristics) {
-  if (this.config.defined) return
+Workspace.prototype.heuristics = function(heuristics) {
+  if (this.config.defined) {
+    return
+  }
 
   var was_modified = false
   var that = this
@@ -112,9 +129,14 @@ workspace.prototype.heuristics = function(heuristics) {
   }
 
   Object.keys(heuristics).forEach(function(heuristic) {
-    if (['node', 'requirejs'].indexOf(heuristic) >= 0) plugin(heuristic)
-    else lib(heuristic)
+    if (['node', 'requirejs'].indexOf(heuristic) >= 0) {
+      plugin(heuristic)
+    } else {
+      lib(heuristic)
+    }
   })
 
-  if (was_modified) that.start(that.config)
+  if (was_modified) {
+    that.start(that.config)
+  }
 }

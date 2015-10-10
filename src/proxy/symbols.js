@@ -14,23 +14,35 @@ var range = function(span) {
 }
 
 var type_code = function(type) {
-  if (type.match(/^fn/)) return 'function'
-  else return 'variable'
+  if (type.match(/^fn/)) {
+    return 'function'
+  } else {
+    return 'variable'
+  }
 }
 
 var tagger = function(lines, condense, tags, parent, name) {
-  if (typeof condense !== 'object' || name.match(/^\!/)) return 0
+  if (typeof condense !== 'object' || name.match(/^\!/)) {
+    return 0
+  }
+
   var type = condense['!type']
   var span = condense['!span']
+
   var p = parent.slice()
   p.push(name)
 
   Object.keys(condense).forEach(function(key) {
-    if (key.match(/^\!/)) return 0
+    if (key.match(/^\!/)) {
+      return 0
+    }
+
     tagger(lines, condense[key], tags, p, key)
   })
 
-  if (!span) return 0
+  if (!span) {
+    return 0
+  }
 
   var r = range(span)
 
@@ -47,7 +59,6 @@ var tagger = function(lines, condense, tags, parent, name) {
 }
 
 module.exports = function(condense, content) {
-  var types = {}
   var tags = []
 
   Object.keys(condense).forEach(function(name) {

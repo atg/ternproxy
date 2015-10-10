@@ -1,7 +1,6 @@
 var noop = function() {}
 var merge = require('deepmerge')
 var tryor = require('tryor')
-var async = require('async')
 var interpolate = require('util').format
 var path = require('path')
 var fs = require('fs')
@@ -9,7 +8,6 @@ var fs = require('fs')
 var log = require('./log')
 var present = require('./config.json')
 var expand = require('./expand')
-
 
 var utils = module.exports
 utils.completions = noop
@@ -125,7 +123,7 @@ utils.completions.order = function(callback) {
       return a.depth - b.depth
     })
 
-    callback(e, data)
+    callback(err, data)
   }
 }
 
@@ -176,7 +174,7 @@ utils.JSON.read = function(file, callback) {
       return callback()
     }
 
-    fs.readFile(file, 'utf8', function(e, data) {
+    fs.readFile(file, 'utf8', function(err, data) {
       if (err) {
         return callback(err)
       }

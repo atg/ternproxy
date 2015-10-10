@@ -1,5 +1,4 @@
-var interpolate = require('util').format,
-    verbose = require('optimist').argv.v
+var interpolate = require('util').format
 
 module.exports = function(message) {
   console.log('Chocolat ⇄ Tern: ', message)
