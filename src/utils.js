@@ -2,7 +2,7 @@ var noop = function() {}
 var merge = require('deepmerge')
 var tryor = require('tryor')
 var async = require('async')
-var interpolate = require('util').format,
+var interpolate = require('util').format
 var path = require('path')
 var fs = require('fs')
 
@@ -96,11 +96,11 @@ utils.http.respond = function(req, res) {
       return
     }
 
-    if (!e && typeof status !== 'number') {
+    if (!err && typeof status !== 'number') {
       status = 200
     }
 
-    if (e && typeof status !== 'number') {
+    if (err && typeof status !== 'number') {
       status = 500
     }
 
