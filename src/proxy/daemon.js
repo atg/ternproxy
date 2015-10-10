@@ -101,7 +101,6 @@ router.post('/file/complete', function(req, res) {
       docs: true,
       urls: true,
       sort: false,
-      includeKeywords: true,
       omitObjectPrototype: false,
       guess: true,
       filter: true,
