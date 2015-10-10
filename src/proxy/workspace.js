@@ -2,7 +2,7 @@ var utils = require('../utils')
 var path = require('path')
 
 var condense = require('../condense')
-var tern = require('../../../tern')
+var tern = require('tern')
 
 var Workspace = module.exports = function(dir, id, callback, tolerance) {
   if (!(this instanceof Workspace)) {

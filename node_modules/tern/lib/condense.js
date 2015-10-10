@@ -114,6 +114,7 @@
         } else data = {type: actual};
         data.span = state.getSpan(type) || (actual != type && state.isTarget(actual.origin) && state.getSpan(actual)) || data.span;
         data.doc = type.doc || (actual != type && state.isTarget(actual.origin) && actual.doc) || data.doc;
+        data.html = type.html;
         data.data = actual.metaData;
         data.byName = data.byName == null ? !!byName : data.byName && byName;
         state.types[newPath] = data;
@@ -207,6 +208,7 @@
     }
     if (info.span) out["!span"] = info.span;
     if (info.doc) out["!doc"] = info.doc;
+    if (info.html) out["!html"] = info.html;
     if (info.data) out["!data"] = info.data;
   }
 

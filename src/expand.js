@@ -49,6 +49,10 @@ function last (xs) {
 
 // / Parse a tern function type string into an AST representation.
 function parser (txt) {
+  if (!txt) {
+    return undefined;
+  }
+
   var tokens = tokenize(txt)
 
   var root = ast_node()
@@ -65,7 +69,6 @@ function parser (txt) {
       if (argsMode) {
         parent.args.push(node)
       } else {
-        console.assert(lastNode.ret === null)
         lastNode.ret = node
       }
 
@@ -82,7 +85,6 @@ function parser (txt) {
       if (argsMode) {
         parent.args.push(T)
       } else {
-        console.assert(lastNode.ret === null)
         lastNode.ret = T
       }
     }
