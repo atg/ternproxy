@@ -32,8 +32,8 @@ module.exports = function() {
         return utils.http.respond(req, res)(null, null, 404)
       }
 
-      form.parse(req, function(e, fields, files) {
-        if (e) throw e
+      form.parse(req, function(err, fields, files) {
+        if (err) throw err
 
         if (fields.cursor_position) {
           fields.cursor_position = Number(fields.cursor_position)

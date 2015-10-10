@@ -288,9 +288,9 @@ router.post('/tags', function(req, res) {
   var content = proxy.file(req.body, workspace).pop().text
   var file = req.body.path
 
-  var callback = function(e, condense) {
-    if (e) {
-      return utils.http.respond(req, res)(e)
+  var callback = function(err, condense) {
+    if (err) {
+      return utils.http.respond(req, res)(err)
     }
 
     var tags = symbols(condense, content)
