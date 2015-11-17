@@ -4,6 +4,7 @@ node_modules/**/readme.txt
 node_modules/**/*.md
 node_modules/**/*.markdown
 node_modules/**/HISTORY.md
+node_modules/**/CHANGELOG.md
 node_modules/**/.jshintrc
 node_modules/**/.travis.yml
 node_modules/**/.tern-project
@@ -14,6 +15,13 @@ node_modules/**/.editorconfig
 node_modules/**/examples
 node_modules/**/Gruntfile.js
 node_modules/**/.gitmodules
+node_modules/**/README*
+node_modules/**/.eslintrc
+node_modules/**/.jscs.json
+node_modules/**/test.js
+node_modules/**/test
+node_modules/**/example
+node_modules/**/man
 
 node_modules/wrappy/test
 node_modules/wordwrap/test
@@ -59,3 +67,19 @@ node_modules/glob/node_modules/minimatch/test
 node_modules/glob/node_modules/minimatch/browser.js
 node_modules/highlight.js/styles
 node_modules/semver/bin
+node_modules/acorn-jsx/test
+node_modules/async/dist
+node_modules/balanced-match/test
+node_modules/bl/test
+node_modules/boom/images/boom.png
+node_modules/boom/test
+node_modules/brace-expansion/example.js
+node_modules/concat-map/example
+node_modules/concat-map/test
+node_modules/cryptiles/test
+node_modules/ctype/man
+node_modules/jade/testing
+node_modules/jade/Jade.md
+node_modules/jade/jade.min.js
+node_modules/jade/runtime.js
+node_modules/jade/runtime.min.js
