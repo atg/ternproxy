@@ -1,4 +1,4 @@
-var interpolate = require('util').format
+var format = require('util').format
 var formidable = require('formidable')
 var domain = require('domain')
 

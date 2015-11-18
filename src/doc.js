@@ -1,10 +1,9 @@
-var interpolate = require('util').format
+var format = require('util').format
 var hljs = require('highlight.js')
 var Remarkable = require('remarkable')
 var path = require('path')
 
-
-var css = interpolate('file://%s', path.join(__dirname, 'doc.css'));
+var css = format('file://%s', path.join(__dirname, 'doc.css'));
 var md = new Remarkable({
   breaks: true,
   linkify: true,
@@ -45,12 +44,12 @@ var addTagsTable = function(tags) {
   })
 
   Object.keys(types).forEach(function(type) {
-    returns += interpolate('<p class=\'tag\'><strong>%ss</strong></p><table><tbody>', type);
+    returns += format('<p class=\'tag\'><strong>%ss</strong></p><table><tbody>', type);
     var tags = types[type];
 
-    returns += interpolate('%s</tbody></table>', tags.map(function(tag) {
+    returns += format('%s</tbody></table>', tags.map(function(tag) {
       if (tag.types && Array.isArray(tag.types)) tag.types = tag.types.map(function(type) {
-        return interpolate('<code>%s</code>', type);
+        return format('<code>%s</code>', type);
       }).filter(function(type) {
         return !!type;
       }).join(',');
@@ -60,7 +59,7 @@ var addTagsTable = function(tags) {
           var description = tag.description ? md.render(tag.description).trim().replace(/\n/, '').replace(/^<p>|<\/p>$/gm, '') : '';
 
           if (tag.types) {
-            return interpolate('<tr><td>%s</td><td>%s</td></tr>', tag.types, description);
+            return format('<tr><td>%s</td><td>%s</td></tr>', tag.types, description);
           }
 
           break;
@@ -68,16 +67,16 @@ var addTagsTable = function(tags) {
           var description = tag.description ? md.render(tag.description).trim().replace(/\n/, '').replace(/^<p>|<\/p>$/gm, '') : '';
 
           if (tag.types) {
-            return interpolate('<tr><td>%s</td><td>%s</td></tr>', tag.types, description);
+            return format('<tr><td>%s</td><td>%s</td></tr>', tag.types, description);
           }
 
           break;
         case 'param':
           var description = tag.description ? md.render(tag.description).trim().replace(/\n/, '').replace(/^<p>|<\/p>$/gm, '') : '';
-          var name = tag.name ? interpolate('<code>%s</code>', tag.name) : '';
+          var name = tag.name ? format('<code>%s</code>', tag.name) : '';
 
           if (tag.types) {
-            return interpolate('<tr><td>%s</td><td>%s</td><td>%s</td></tr>', tag.types, name, description);
+            return format('<tr><td>%s</td><td>%s</td><td>%s</td></tr>', tag.types, name, description);
           }
 
           break;
@@ -85,7 +84,7 @@ var addTagsTable = function(tags) {
           var description = tag.description ? md.render(tag.description).trim().replace(/\n/, '').replace(/^<p>|<\/p>$/gm, '') : '';
 
           if (tag.types) {
-            return interpolate('<tr><td>%s</td><td>%s</td></tr>', tag.types, description);
+            return format('<tr><td>%s</td><td>%s</td></tr>', tag.types, description);
           }
 
           break;
@@ -246,5 +245,5 @@ module.exports = function(comments, aval, type) {
     html += addTagsTable(comment.tags)
   }
 
-  return html.concat(interpolate('<link href=\'%s\' rel=\'stylesheet\' type=\'text/css\'>', css))
+  return html.concat(format('<link href=\'%s\' rel=\'stylesheet\' type=\'text/css\'>', css))
 };

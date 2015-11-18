@@ -298,8 +298,7 @@ router.post('/tags', function(req, res) {
       return utils.http.respond(req, res)(err)
     }
 
-    var tags = symbols(condense, content)
-    utils.http.respond(req, res)(null, tags, 200)
+    symbols(condense, content, utils.http.respond(req, res))
   }
 
   if (workspace) {

@@ -1,3 +1,5 @@
+var jsctags = require('jsctags')
+
 var range = function(span) {
   span = span.match(/^(\d*?)\[(\d*?)\:(\d*?)\]-(\d*?)\[\d*?\:\d*?\]$/)
 
@@ -13,61 +15,48 @@ var range = function(span) {
   }
 }
 
-var type_code = function(type) {
-  if (type.match(/^fn/)) {
-    return 'function'
-  } else {
-    return 'variable'
-  }
-}
-
-var tagger = function(lines, condense, tags, parent, name) {
-  if (typeof condense !== 'object' || name.match(/^\!/)) {
-    return 0
+var transform = function(lines, tag) {
+  var split = function() {
+    return !tag.namespace ? [] : (tag.namespace || '').split(/\./)
   }
 
-  var type = condense['!type']
-  var span = condense['!span']
-
-  var p = parent.slice()
-  p.push(name)
-
-  Object.keys(condense).forEach(function(key) {
-    if (key.match(/^\!/)) {
-      return 0
-    }
-
-    tagger(lines, condense[key], tags, p, key)
-  })
-
-  if (!span) {
-    return 0
+  var join = function(tokens) {
+    return tokens.join('::')
   }
 
-  var r = range(span)
+  var qualified_name = function() {
+    return join(split().concat(tag.name))
+  }
 
-  return tags.push({
-    name: name,
-    qualified_name: p.join('::'),
-    type_code: type_code(type || ''),
-    parent_name: parent.join('::'),
+  var type_code = function() {
+    return tag.kind === 'v' ? 'variable' : 'function'
+  }
+
+  var parent_name = function() {
+    return join(split())
+  };
+
+  var r = range(tag['origin']['!span'])
+
+  return {
+    name: tag.name,
+    qualified_name: qualified_name(),
+    type_code: type_code(),
+    parent_name: parent_name(),
     range_line: r.line,
     range_column: r.column,
     range_length: r.length,
     line_content: lines[r.line]
-  })
+  }
 }
 
-module.exports = function(condense, content) {
-  var tags = []
+module.exports = function(condense, content, fn) {
+  var lines = content.split(/\n/)
 
-  Object.keys(condense).forEach(function(name) {
-    tagger(content.split('\n'), condense[name], tags, [], name)
+  jsctags({
+    condense: condense,
+    content: content
+  }, function(err, tags) {
+    fn(err, (tags || []).map(transform.bind(this, lines)))
   })
-
-  return {
-    tags: tags.sort(function(tag1, tag2) {
-      return tag1.range_line - tag2.range_line
-    })
-  }
 }

@@ -1,4 +1,4 @@
-var interpolate = require('util').format
+var format = require('util').format
 var request = require('request')
 
 var ternproxy = require('../src/daemon')
@@ -13,7 +13,7 @@ beforeEach(function(callback) {
 })
 
 module.exports.query = function(url, body, callback) {
-  request.post(interpolate('http://0.0.0.0:8542%s', url), {
+  request.post(format('http://0.0.0.0:8542%s', url), {
     form: body
   }, function(e, res, body) {
     if (err) {

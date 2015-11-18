@@ -1,9 +1,5 @@
 # ternproxy
 
-TODO: 
- - [] make sure it works with jsx
- - [] implement jsctags recursive symbols (using the same server)
-
 ## license
 
 > This is free and unencumbered software released into the public domain.

@@ -1,7 +1,8 @@
 var noop = function() {}
 var merge = require('deepmerge')
 var tryor = require('tryor')
-var interpolate = require('util').format
+var some = require('lodash.some')
+var format = require('util').format
 var path = require('path')
 var fs = require('fs')
 
@@ -52,12 +53,21 @@ utils.get.file = function(name, callback) {
 utils.load.plugins = function(plugins) {
   var base = path.resolve(utils.find.module('tern'), 'plugin')
 
-  Object.keys(plugins).forEach(function(plugin) {
-    var file = path.join(base, interpolate('%s.js', plugin))
-
-    if (fs.existsSync(file)) {
-      return require(file)
+  var attempt = function(file) {
+    if (!fs.existsSync(file)) {
+      return false
     }
+
+    require(file)
+    return true
+  }
+
+  Object.keys(plugins).forEach(function(plugin) {
+    some([
+      path.join(base, format('%s.js', plugin)),
+      format('tern-%s', plugin),
+      plugin
+    ], attempt)
   })
 }
 

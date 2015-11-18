@@ -1,4 +1,4 @@
-var interpolate = require('util').format
+var format = require('util').format
 var workspace = require('./workspace')
 var utils = require('../utils')
 var path = require('path')
@@ -64,7 +64,7 @@ proxy.timeout = function(id) {
 
 proxy.filename = function(info) {
   // If this is untitled, use ///null/<documentid>
-  if (info.path === '///null') return interpolate('///null/%s', info.document_id)
+  if (info.path === '///null') return format('///null/%s', info.document_id)
   return info.path
 }
 
