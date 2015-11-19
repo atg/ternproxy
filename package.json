@@ -8,7 +8,7 @@
     "deepmerge": "^0.2.10",
     "formidable": "^1.0.17",
     "highlight.js": "^8.9.1",
-    "jsctags": "^2.0.0",
+    "jsctags": "^2.0.1",
     "lodash.some": "^3.2.3",
     "mkdirp": "^0.5.1",
     "optimist": "^0.6.1",

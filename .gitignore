@@ -22,6 +22,7 @@ node_modules/**/test.js
 node_modules/**/test
 node_modules/**/example
 node_modules/**/man
+node_modules/*/**/.bin
 
 node_modules/wrappy/test
 node_modules/wordwrap/test
@@ -83,3 +84,11 @@ node_modules/jade/Jade.md
 node_modules/jade/jade.min.js
 node_modules/jade/runtime.js
 node_modules/jade/runtime.min.js
+
+node_modules/tern-react/node_modules/tern
+node_modules/tern-react/demos
+node_modules/tern-react/scripts
+node_modules/tern-react/tern_1.5.1
+node_modules/typescript/bin/resources
+node_modules/typescript/bin/tsc
+node_modules/typescript/bin/tsc.js
