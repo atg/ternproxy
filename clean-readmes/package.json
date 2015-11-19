@@ -1,0 +1,11 @@
+{
+  "name": "clean-readmes",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "glob": "^6.0.1",
+    "into-stream": "^2.0.0",
+    "through2": "^2.0.0"
+  }
+}

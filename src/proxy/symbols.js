@@ -1,4 +1,6 @@
-var range = function (span) {
+var jsctags = require('jsctags')
+
+var range = function(span) {
   span = span.match(/^(\d*?)\[(\d*?)\:(\d*?)\]-(\d*?)\[\d*?\:\d*?\]$/)
 
   var lend = Number(span.pop())
@@ -13,32 +15,51 @@ var range = function (span) {
   }
 }
 
-var type_code = function (type) {
-  if(type.match(/^fn/)) return 'function'
-  else return 'variable'
-}
+var transform = function(lines, tag) {
+  var clean = function(token) {
+    return token.replace(/\:\:$/, '')
+  }
 
-var tagger = function (lines, condense, tags, parent, name) {
-  if(typeof condense !== 'object' || name.match(/^\!/)) return 0
-  var type = condense['!type']
-  var span = condense['!span']
-  var p = parent.slice()
-  p.push(name)
+  var filter = function(tokens) {
+    if (!Array.isArray(tokens)) {
+      return tokens;
+    }
 
-  Object.keys(condense).forEach(function (key) {
-    if(key.match(/^\!/)) return 0
-    tagger(lines, condense[key], tags, p, key)
-  })
+    var first = tokens.shift();
+    var last = tokens.pop();
 
-  if(!span) return 0
+    return [first].concat(tokens.filter(function(token) {
+      return token !== 'prototype';
+    })).concat([last]);
+  }
 
-  var r = range(span)
+  var split = function() {
+    return !tag.namespace ? [] : (tag.namespace || '').split(/\./)
+  }
 
-  return tags.push({
-    name: name,
-    qualified_name: p.join('::'),
-    type_code: type_code(type || ''),
-    parent_name: parent.join('::'),
+  var join = function(tokens) {
+    return tokens.join('::')
+  }
+
+  var qualified_name = function() {
+    return clean(join(filter(split().concat(tag.name))))
+  }
+
+  var type_code = function() {
+    return tag.kind === 'v' ? 'variable' : 'function'
+  }
+
+  var parent_name = function() {
+    return clean(join(filter(split())))
+  };
+
+  var r = range(tag['origin']['!span'])
+
+  return filter({
+    name: tag.name,
+    qualified_name: qualified_name(),
+    type_code: type_code(),
+    parent_name: parent_name(),
     range_line: r.line,
     range_column: r.column,
     range_length: r.length,
@@ -46,17 +67,42 @@ var tagger = function (lines, condense, tags, parent, name) {
   })
 }
 
-module.exports = function (condense, content) {
-  var types = {}
-  var tags = []
+var map = function(lines, tags) {
+  return tags.map(transform.bind(this, lines))
+}
 
-  Object.keys(condense).forEach(function (name) {
-    tagger(content.split('\n'), condense[name], tags, [], name)
-  })
+var proto = function(symbol) {
+  var i = symbol.qualified_name.split(/\:\:/).indexOf('prototype');
 
-  return {
-    tags: tags.sort(function (tag1, tag2) {
-      return tag1.range_line - tag2.range_line
+  if (symbol.name !== 'prototype') {
+    return true;
+  }
+
+
+  if (i < 0) {
+    return true;
+  }
+
+  if (i !== 1) {
+    return true;
+  }
+
+  return false;
+}
+
+var hasTags = function(lines, fn) {
+  return function(err, tags) {
+    fn(err, {
+      tags: map(lines, tags || []).filter(proto)
     })
   }
+}
+
+module.exports = function(condense, content, fn) {
+  var lines = content.split(/\n/)
+
+  jsctags({
+    condense: condense,
+    content: content
+  }, hasTags(lines, fn))
 }

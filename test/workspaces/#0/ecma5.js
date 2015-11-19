@@ -14,7 +14,7 @@ function Book(title, author) {
  * Rent a book
  * @param {number} id - Id of the user
  */
-Book.prototype.rent = function (id) {
+Book.prototype.rent = function(id) {
   return true
 }
 

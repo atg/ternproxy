@@ -1,12 +1,11 @@
-var interpolate = require('util').format,
-    verbose = require('optimist').argv.v
+var format = require('util').format
 
-module.exports = function (message) {
-  console.log('Chocolat ⇄ Tern: ', message);
+module.exports = function(message) {
+  console.log('Chocolat ⇄ Tern: ', message)
 }
 
-module.exports.onError = function (e, res) {
-  module.exports(interpolate('%s\nArguments: %s\nType: %s\nStack: %s\n', e.message, e.arguments, e.type, e.stack))
+module.exports.onError = function(e, res) {
+  module.exports(format('%s\nArguments: %s\nType: %s\nStack: %s\n', e.message, e.arguments, e.type, e.stack))
 }
 
 process.removeListener('uncaughtException', module.exports.onError)
