@@ -203,8 +203,9 @@ function snippet(obj) {
   snips = cleanArguments(snips);
 
   // If the last argument is called context then get rid of it, it's evil!
-  if (snips.length && snips[snips.length - 1] === 'context')
-    snips.pop();
+  if (snips.length)
+    if (snips[snips.length - 1] === 'context' || snips[snips.length - 1] === 'context?')
+      snips.pop();
 
   // Finally join the arguments into a snippet
   snips = snips.map(function(arg) {
