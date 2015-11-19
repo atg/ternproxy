@@ -95,9 +95,8 @@
       "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
     },
     "jsctags": {
-      "version": "0.2.1",
-      "from": "ramitos/jsctags#f8b327",
-      "resolved": "git://github.com/ramitos/jsctags.git#f8b327242141bc68f1fe2a854e11cd0bb77b2d80"
+      "version": "2.0.0",
+      "from": "jsctags@>=2.0.0 <3.0.0"
     },
     "lodash._arraycopy": {
       "version": "3.0.0",
@@ -317,9 +316,9 @@
       "resolved": "https://registry.npmjs.org/remarkable/-/remarkable-1.6.0.tgz"
     },
     "semver": {
-      "version": "5.0.3",
+      "version": "5.1.0",
       "from": "semver@>=5.0.3 <6.0.0",
-      "resolved": "https://registry.npmjs.org/semver/-/semver-5.0.3.tgz"
+      "resolved": "https://registry.npmjs.org/semver/-/semver-5.1.0.tgz"
     },
     "sigmund": {
       "version": "1.0.1",
