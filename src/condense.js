@@ -9,7 +9,8 @@ module.exports = function(proto, comments) {
       getFile: utils.get.file,
       async: true,
       plugins: {
-        doc_comment: Boolean(comments)
+        doc_comment: Boolean(comments),
+        'local-scope': true
       }
     }
 

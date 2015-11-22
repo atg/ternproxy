@@ -25,6 +25,7 @@ node_modules/**/*/test
 node_modules/**/*/example
 node_modules/**/*/man
 node_modules/*/**/.bin
+node_modules/*/**/.jepso-ci.json
 
 node_modules/wrappy/test
 node_modules/wordwrap/test
@@ -97,7 +98,7 @@ node_modules/typescript/bin/tsc.js
 node_modules/nan/doc
 node_modules/nan/tools
 node_modules/object-hash/dist
-
+node_modules/node-uuid/benchmark
 node_modules/async/CHANGELOG.md
 node_modules/collect-stream/build.js
 node_modules/core-util-is/float.patch
@@ -106,3 +107,5 @@ node_modules/jsctags/.coveralls.yml
 node_modules/jsctags/.istanbul.yml
 node_modules/sigmund/bench.js
 node_modules/util-deprecate/browser.js
+node_modules/force-array/.codeclimate.yml
+node_modules/force-array/.istanbul.yml

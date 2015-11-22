@@ -8,8 +8,12 @@
     "deepmerge": "^0.2.10",
     "formidable": "^1.0.17",
     "highlight.js": "^8.9.1",
-    "jsctags": "^2.0.1",
+    "jsctags": "^4.0.0",
+    "lodash.groupby": "^3.1.1",
+    "lodash.map": "^3.1.4",
+    "lodash.mapvalues": "^3.0.1",
     "lodash.some": "^3.2.3",
+    "lodash.sortby": "^3.1.5",
     "mkdirp": "^0.5.1",
     "optimist": "^0.6.1",
     "posix": "^4.0.0",
@@ -17,12 +21,6 @@
     "semver": "^5.0.3",
     "tern": "fileability/tern#f524b7",
     "tryor": "^0.1.2"
-  },
-  "devDependencies": {
-    "chai": "^1.9.1",
-    "mocha": "^1.20.1",
-    "request": "^2.36.0",
-    "waterfall": "^1.0.0"
   },
   "scripts": {
     "test": "node_modules/.bin/mocha test/specs -u exports -R spec"

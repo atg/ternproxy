@@ -52,8 +52,14 @@ utils.get.file = function(name, callback) {
 
 utils.load.plugins = function(plugins) {
   var base = path.resolve(utils.find.module('tern'), 'plugin')
+  var local = path.resolve(__dirname, '../node_modules/jsctags/src/local-scope')
 
   var attempt = function(file) {
+    if (file === 'local-scope') {
+      require(local)
+      return true
+    }
+
     if (!fs.existsSync(file)) {
       return false
     }

@@ -1,6 +1,7 @@
 {
   "libs": ["ecma5", "ecma6"],
   "plugins": {
-    "doc_comment": true
+    "doc_comment": true,
+    "local-scope": true
   }
 }
