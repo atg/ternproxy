@@ -1,7 +1,7 @@
-var condense = require('tern/lib/condense')
-var tern = require('tern')
+var condense = require('tern/lib/condense');
+var tern = require('tern');
 
-var utils = require('./utils')
+var utils = require('./utils');
 
 module.exports = function(proto, comments) {
   return function(file, content, dir, callback) {
@@ -12,44 +12,46 @@ module.exports = function(proto, comments) {
         doc_comment: Boolean(comments),
         'local-scope': true
       }
-    }
+    };
 
     var server = (function(that) {
       if (!utils.defined(proto)) {
-        return new tern.Server(config)
+        return new tern.Server(config);
       }
 
       if (!(that instanceof proto)) {
-        return new tern.Server(config)
+        return new tern.Server(config);
       }
 
       if (!utils.defined(that.config.plugins.node)) {
-        return that.tern
+        return that.tern;
       }
 
-      config = JSON.parse(JSON.stringify(that.config))
-      config.plugins.node = undefined
-      return new tern.Server(JSON.parse(JSON.stringify(config)))
-    })(this)
+      config = JSON.parse(JSON.stringify(that.config));
+      config.plugins.node = undefined;
+      return new tern.Server(JSON.parse(JSON.stringify(config)));
+    })(this);
+
+    var filename = server.normalizeFilename(file);
 
     server.request({
       files: [{
-        name: file,
+        name: filename,
         text: content,
         type: 'full'
       }]
-    }, utils.noop)
+    }, utils.noop);
 
     server.flush(function(err) {
       if (err) {
-        return callback(err)
+        return callback(err);
       }
 
-      callback(null, condense.condense(file, file, {
+      callback(null, condense.condense(filename, filename, {
         spans: true
-      }))
+      }));
 
-      server.reset()
-    })
-  }
-}
+      server.reset();
+    });
+  };
+};

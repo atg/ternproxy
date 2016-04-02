@@ -1,53 +1,51 @@
-var http = require('http')
-var posix = require('posix')
+var http = require('http');
+var posix = require('posix');
 
-
-var symbols = require('./symbols')
-var utils = require('../utils')
-var proxy = require('./proxy')
-var condense = require('../condense')()
-var router = require('../router')()
-var log = require('../log')
-
+var symbols = require('./symbols');
+var utils = require('../utils');
+var proxy = require('./proxy');
+var condense = require('../condense')();
+var router = require('../router')();
+var log = require('../log');
 
 var server = http.createServer(router).listen(8542, '127.0.0.1', function() {
-  log('HTTP server running')
-})
+  log('HTTP server running');
+});
 
 // every 3s check if the parent is still running
 setInterval(function() {
   if (server.connections) {
-    return
+    return;
   }
 
   if (posix.getppid() < 2) {
-    process.exit()
+    process.exit();
   }
-}, 3000)
+}, 3000);
 
 router.post('/file/opened', function(req, res) {
-  var workspace = proxy.workspace(req.body)
+  var workspace = proxy.workspace(req.body);
 
-  workspace.file(req.body.document_id, req.body.FILE, proxy.filename(req.body))
-  utils.http.respond(req, res)(null, 'Document opened')
-})
+  workspace.file(req.body.document_id, req.body.FILE, proxy.filename(req.body));
+  utils.http.respond(req, res)(null, 'Document opened');
+});
 
 router.post('/file/closed', function(req, res) {
   Object.keys(proxy.workspaces).map(function(project_id) {
-    return proxy.workspaces[project_id]
+    return proxy.workspaces[project_id];
   }).filter(function(workspace) {
-    return workspace && !!workspace.cache[req.body.document_id]
+    return workspace && !!workspace.cache[req.body.document_id];
   }).forEach(function(workspace) {
-    clearTimeout(workspace.cache[req.body.document_id].timeout)
-    workspace.clean(req.body.document_id)()
+    clearTimeout(workspace.cache[req.body.document_id].timeout);
+    workspace.clean(req.body.document_id)();
 
     if (!proxy.compact(workspace)) {
-      proxy.timeout(workspace.id)()
+      proxy.timeout(workspace.id)();
     }
-  })
+  });
 
-  utils.http.respond(req, res)(null, 'Document closed')
-})
+  utils.http.respond(req, res)(null, 'Document closed');
+});
 
 /**
  * Asks the server for a set of completions at the given point.
@@ -85,10 +83,10 @@ router.post('/file/closed', function(req, res) {
  *     {} origin
  */
 router.post('/file/complete', function(req, res) {
-  var workspace = proxy.workspace(req.body)
+  var workspace = proxy.workspace(req.body);
 
   if (!workspace) {
-    return utils.http.respond(req, res)(null, undefined, 304)
+    return utils.http.respond(req, res)(null, undefined, 304);
   }
 
   workspace.tern.request({
@@ -107,12 +105,16 @@ router.post('/file/complete', function(req, res) {
       origins: true,
       end: req.body.cursor_position
     }
-  }, utils.completions.order(utils.completions.transform(utils.http.respond(req, res))))
+  }, utils.completions.order(utils.completions.transform(utils.http.respond(req, res))));
 
-  if (utils.defined(req.body.heuristics)) setImmediate(function() {
-    workspace.heuristics(req.body.heuristics)
-  })
-})
+  if (!utils.defined(req.body.heuristics)) {
+    return;
+  }
+
+  setImmediate(function() {
+    workspace.heuristics(req.body.heuristics);
+  });
+});
 
 /**
  * Asks for the definition of something. This will try, for a variable or property,
@@ -138,10 +140,10 @@ router.post('/file/complete', function(req, res) {
  *   {string} origin
  */
 router.post('/definition', function(req, res) {
-  var workspace = proxy.workspace(req.body)
+  var workspace = proxy.workspace(req.body);
 
   if (!workspace) {
-    return utils.http.respond(req, res)(null, undefined, 304)
+    return utils.http.respond(req, res)(null, undefined, 304);
   }
 
   workspace.tern.request({
@@ -151,8 +153,8 @@ router.post('/definition', function(req, res) {
       end: req.body.cursor_position,
       file: '#0'
     }
-  }, utils.http.respond(req, res))
-})
+  }, utils.http.respond(req, res));
+});
 
 /**
  * Query the type of something.
@@ -179,10 +181,10 @@ router.post('/definition', function(req, res) {
  *   {string} origin
  */
 router.post('/type', function(req, res) {
-  var workspace = proxy.workspace(req.body)
+  var workspace = proxy.workspace(req.body);
 
   if (!workspace) {
-    return utils.http.respond(req, res)(null, undefined, 304)
+    return utils.http.respond(req, res)(null, undefined, 304);
   }
 
   workspace.tern.request({
@@ -192,8 +194,8 @@ router.post('/type', function(req, res) {
       end: req.body.cursor_position,
       file: '#0'
     }
-  }, utils.http.respond(req, res))
-})
+  }, utils.http.respond(req, res));
+});
 
 /**
  * Get the documentation string and URL for a given expression, if any
@@ -208,10 +210,10 @@ router.post('/type', function(req, res) {
  *   {string} origin
  */
 router.post('/documentation', function(req, res) {
-  var workspace = proxy.workspace(req.body)
+  var workspace = proxy.workspace(req.body);
 
   if (!workspace) {
-    return utils.http.respond(req, res)(null, undefined, 304)
+    return utils.http.respond(req, res)(null, undefined, 304);
   }
 
   workspace.tern.request({
@@ -221,8 +223,8 @@ router.post('/documentation', function(req, res) {
       end: req.body.cursor_position,
       file: '#0'
     }
-  }, utils.http.respond(req, res))
-})
+  }, utils.http.respond(req, res));
+});
 
 /**
  * Used to find all references to a given variable or property
@@ -239,10 +241,10 @@ router.post('/documentation', function(req, res) {
  *     {number} end
  */
 router.post('/refs', function(req, res) {
-  var workspace = proxy.workspace(req.body)
+  var workspace = proxy.workspace(req.body);
 
   if (!workspace) {
-    return utils.http.respond(req, res)(null, undefined, 304)
+    return utils.http.respond(req, res)(null, undefined, 304);
   }
 
   workspace.tern.request({
@@ -252,8 +254,8 @@ router.post('/refs', function(req, res) {
       end: req.body.cursor_position,
       file: '#0'
     }
-  }, utils.http.respond(req, res))
-})
+  }, utils.http.respond(req, res));
+});
 
 /**
  * Rename a variable in a scope-aware way
@@ -271,10 +273,10 @@ router.post('/refs', function(req, res) {
  *     {string} text
  */
 router.post('/rename', function(req, res) {
-  var workspace = proxy.workspace(req.body)
+  var workspace = proxy.workspace(req.body);
 
   if (!workspace) {
-    return utils.http.respond(req, res)(null, undefined, 304)
+    return utils.http.respond(req, res)(null, undefined, 304);
   }
 
   workspace.tern.request({
@@ -285,28 +287,28 @@ router.post('/rename', function(req, res) {
       newName: req.body.new_name,
       file: '#0'
     }
-  }, utils.http.respond(req, res))
-})
+  }, utils.http.respond(req, res));
+});
 
 router.post('/tags', function(req, res) {
-  var workspace = proxy.workspace(req.body)
-  var content = proxy.file(req.body, workspace).pop().text
-  var file = req.body.path
+  var workspace = proxy.workspace(req.body);
+  var content = proxy.file(req.body, workspace).pop().text;
+  var file = req.body.path;
 
   var callback = function(err, condense) {
     if (err) {
-      return utils.http.respond(req, res)(err)
+      return utils.http.respond(req, res)(err);
     }
 
-    symbols(condense, content, utils.http.respond(req, res))
-  }
+    symbols(condense, content, utils.http.respond(req, res));
+  };
 
   if (workspace) {
-    workspace.condense(file, content, callback)
+    workspace.condense(file, content, callback);
   } else {
-    condense(file, content, req.body.project_dir, callback)
+    condense(file, content, req.body.project_dir, callback);
   }
-})
+});
 
 router.get('/ping', function(req, res) {
   utils.http.respond(req, res)(null, {
@@ -315,5 +317,5 @@ router.get('/ping', function(req, res) {
     pid: process.pid,
     version: process.version,
     cwd: process.cwd()
-  })
-})
+  });
+});
