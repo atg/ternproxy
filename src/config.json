@@ -2,6 +2,7 @@
   "libs": ["ecma5", "ecma6"],
   "plugins": {
     "doc_comment": true,
-    "local-scope": true
+    "local-scope": true,
+    "jsx": true
   }
 }

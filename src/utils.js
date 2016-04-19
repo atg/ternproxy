@@ -3,6 +3,7 @@ var merge = require('deepmerge');
 var tryor = require('tryor');
 var some = require('lodash.some');
 var format = require('util').format;
+var Module = require('module');
 var path = require('path');
 var fs = require('fs');
 
@@ -32,14 +33,8 @@ var get_cfg = function(file) {
   }
 };
 
-var def_cfg = get_cfg(path.join(process.env.HOME, '.tern-project'));
-
 utils.get.config = function(dir) {
   var file = path.join(dir, '.tern-project');
-
-  if (!fs.existsSync(file) && def_cfg) {
-    return def_cfg;
-  }
 
   return merge(tryor(function() {
     return get_cfg(file) || {};
@@ -54,11 +49,13 @@ utils.load.plugins = function(plugins) {
   var base = path.resolve(utils.find.module('tern'), 'plugin');
   var local = path.resolve(__dirname, '../node_modules/jsctags/src/local-scope');
 
-  var attempt = function(file) {
-    if (file === 'local-scope') {
+  var attempt = function(name) {
+    if (name === 'local-scope') {
       require(local);
       return true;
     }
+
+    var file = Module._findPath(name, module.paths);
 
     if (!fs.existsSync(file)) {
       return false;
