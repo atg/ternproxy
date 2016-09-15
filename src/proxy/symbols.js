@@ -185,13 +185,13 @@ Parser.prototype.range = function(span) {
   };
 };
 
-module.exports = function(condense, content, fn) {
+module.exports = function(ctx, fn) {
   var hasTags = function(err, tags) {
     if (err) {
       return fn(err);
     }
 
-    var lines = content.split(/\n/);
+    var lines = ctx.content.split(/\n/);
     var symbols = new Parser(lines, tags).symbols;
     // console.log(symbols);
 
@@ -201,8 +201,9 @@ module.exports = function(condense, content, fn) {
   };
 
   jsctags({
-    condense: condense,
-    content: content,
+    file: ctx.file,
+    condense: ctx.condense,
+    content: ctx.content,
     preserveType: true
   }, hasTags);
 };

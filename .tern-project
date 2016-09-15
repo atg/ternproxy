@@ -1,6 +1,6 @@
 {
-  "libs": ["ecma5", "ecma6"],
+  "libs": ["ecmascript"],
   "plugins": {
-    "node": {}
+    "node": true
   }
 }

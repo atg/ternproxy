@@ -300,7 +300,11 @@ router.post('/tags', function(req, res) {
       return utils.http.respond(req, res)(err);
     }
 
-    symbols(condense, content, utils.http.respond(req, res));
+    symbols({
+      condense: condense,
+      content: content,
+      file: file
+    }, utils.http.respond(req, res));
   };
 
   if (workspace) {

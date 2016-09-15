@@ -112,7 +112,7 @@ Workspace.prototype.heuristics = function(heuristics) {
     }
 
     if (heuristics[plugin] >= 0.5 && !is_defined) {
-      that.config.plugins[plugin] = {};
+      that.config.plugins[plugin] = true;
       was_modified = true;
     }
   };

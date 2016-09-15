@@ -1,15 +1,10 @@
 {
   "libs": [
-    "ecma5",
-    "ecma6"
+    "ecmascript"
   ],
   "plugins": {
     "doc_comment": true,
     "local-scope": true,
-    "es_modules": true,
-    "jsx": true,
-    "modules": {
-      "load": true
-    }
+    "jsx": true
   }
 }
